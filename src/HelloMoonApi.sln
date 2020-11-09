@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharacterApi", "CharacterApi\CharacterApi.csproj", "{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D904CB0-4CE3-453F-8583-1FFA62283205}
+	EndGlobalSection
+EndGlobal

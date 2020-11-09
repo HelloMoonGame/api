@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "CharacterApi";
+
+package characterApi;
+
+service Location {
+  rpc Subscribe (Empty) returns (stream LocationUpdateResponse);
+}
+
+message Empty {
+}
+
+message LocationUpdateResponse {
+	repeated LocationUpdate locationUpdates = 1;
+}
+
+message LocationUpdate {
+	string characterId = 1;
+	bool online = 2;
+	int32 x = 3;
+	int32 y = 4;
+}
