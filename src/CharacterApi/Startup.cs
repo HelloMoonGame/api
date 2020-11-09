@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CharacterApi.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +39,7 @@ namespace CharacterApi
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>().EnableGrpcWeb().RequireCors("AllowAll");
+                endpoints.MapGrpcService<LocationService>().EnableGrpcWeb().RequireCors("AllowAll");
 
                 endpoints.MapGet("/", async context =>
                 {
