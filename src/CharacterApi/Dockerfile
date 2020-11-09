@@ -5,7 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /src
-COPY ["CharacterApi/CharacterApi.csproj", "CharacterApi/"]
+COPY ["src/CharacterApi/CharacterApi.csproj", "CharacterApi/"]
 RUN dotnet restore "CharacterApi/CharacterApi.csproj"
 COPY . .
 WORKDIR "/src/CharacterApi"
