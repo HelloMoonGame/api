@@ -4,11 +4,12 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src
-COPY ["src/CharacterApi/CharacterApi.csproj", "CharacterApi/"]
-RUN dotnet restore "CharacterApi/CharacterApi.csproj"
+WORKDIR /src/CharacterApi
+
+COPY "CharacterApi.csproj" .
+RUN dotnet restore "CharacterApi.csproj"
+
 COPY . .
-WORKDIR "/src/CharacterApi"
 RUN dotnet build "CharacterApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
