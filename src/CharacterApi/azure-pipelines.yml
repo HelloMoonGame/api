@@ -23,11 +23,13 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
+        repository: 'hellomoon/character-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
         tags: |
           $(tag)
           latest
+        addPipelineData: false
     - task: Docker@2
       displayName: Publish an image
       inputs:
@@ -37,3 +39,4 @@ stages:
         tags: |
           $(tag)
           latest
+        addPipelineData: false
