@@ -12,8 +12,8 @@ variables:
   tag: '$(Build.BuildId)'
 
 stages:
-- stage: Build
-  displayName: Build image
+- stage: Build and Publish
+  displayName: Build and Publish image
   jobs:  
   - job: Build
     displayName: Build
@@ -28,9 +28,6 @@ stages:
         tags: |
           $(tag)
           latest
-- stage: Publish
-  displayName: Publish image
-  jobs:
   - job: Publish
     displayName: Publish
     pool:
