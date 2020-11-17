@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- master
+- main
 
 resources:
 - repo: self
@@ -25,6 +25,23 @@ stages:
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        tags: |
+          $(tag)
+          latest
+- stage: Publish
+  displayName: Publish image
+  jobs:
+  - job: Publish
+    displayName: Publish
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: |
+          $(dockerHub)
+        repository: 'hellomoon/character-api'
+        command: 'push'
         tags: |
           $(tag)
           latest
