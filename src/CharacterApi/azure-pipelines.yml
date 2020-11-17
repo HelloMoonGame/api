@@ -28,12 +28,8 @@ stages:
         tags: |
           $(tag)
           latest
-  - job: Publish
-    displayName: Publish
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
     - task: Docker@2
+      displayName: Publish an image
       inputs:
         containerRegistry: 'dockerHub'
         repository: 'hellomoon/character-api'
