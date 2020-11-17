@@ -38,8 +38,7 @@ stages:
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: |
-          $(dockerHub)
+        containerRegistry: 'dockerHub'
         repository: 'hellomoon/character-api'
         command: 'push'
         tags: |
