@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- master
+- main
 
 resources:
 - repo: self
@@ -13,7 +13,7 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build and Publish image
   jobs:  
   - job: Build
     displayName: Build
@@ -23,8 +23,20 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
+        repository: 'hellomoon/character-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
         tags: |
           $(tag)
           latest
+        addPipelineData: false
+    - task: Docker@2
+      displayName: Publish an image
+      inputs:
+        containerRegistry: 'dockerHub'
+        repository: 'hellomoon/character-api'
+        command: 'push'
+        tags: |
+          $(tag)
+          latest
+        addPipelineData: false
