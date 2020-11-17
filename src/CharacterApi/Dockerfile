@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
-ENV ASPNETCORE_URLS "https://+:80;https://+:443"
+ENV ASPNETCORE_URLS "http://+:80;https://+:443"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
