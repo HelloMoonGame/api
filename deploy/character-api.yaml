@@ -1,0 +1,73 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: hellomoon
+  name: character-api-stripprefix
+
+spec:
+  stripPrefix:
+    prefixes:
+      - /character
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: hellomoon
+  name: character-api
+
+spec:
+  ports:
+    - protocol: TCP
+      name: https
+      port: 443
+  selector:
+    app: character-api
+    
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: hellomoon
+  name: character-api
+  labels:
+    app: character-api
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: character-api
+  template:
+    metadata:
+      labels:
+        app: character-api
+    spec:
+      containers:
+        - name: character-api
+          image: hellomoon/character-api
+          ports:
+            - name: https
+              containerPort: 443
+
+---
+kind: IngressRoute
+apiVersion: traefik.containo.us/v1alpha1
+metadata:
+  namespace: hellomoon
+  name: character-api-ingressroutetls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`api.hellomoon.nl`) && PathPrefix(`/character`)
+    kind: Rule
+    services:
+    - name: character-api
+      port: 443
+      scheme: https
+    middlewares:
+    - name: character-api-stripprefix
+      namespace: hellomoon
+  tls:
+    certResolver: myresolver
