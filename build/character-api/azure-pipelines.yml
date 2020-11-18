@@ -49,7 +49,7 @@ stages:
     - task: Bash@3
       inputs:
         targetType: 'inline'
-        script: "sed -i 's/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g' character-api.yaml"
+        script: 'sed -i "s/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g" character-api.yaml'
         workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
     - task: PublishBuildArtifacts@1
       inputs:
@@ -89,7 +89,7 @@ stages:
     - task: Bash@3
       inputs:
         targetType: 'inline'
-        script: "sed -i 's/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g' character-api.yaml"
+        script: 'sed -i "s/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g" character-api.yaml'
         workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
     - task: PublishBuildArtifacts@1
       inputs:
