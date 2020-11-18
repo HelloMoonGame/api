@@ -41,6 +41,20 @@ stages:
         tags: |
           $(tag)
         addPipelineData: false
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/deploy'
+        Contents: 'character-api.yaml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: "sed -i 's/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g' character-api.yaml"
+        workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/deploy'
+        artifactName: k8s
   - job: Build
     displayName: Build for Main
     condition: ne('${{ variables['Build.Reason'] }}', 'PullRequest')
@@ -67,3 +81,17 @@ stages:
           $(tag)
           latest
         addPipelineData: false
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/deploy'
+        Contents: 'character-api.yaml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: "sed -i 's/image: hellomoon\/character-api/image: hellomoon\/character-api:$(tag)/g' character-api.yaml"
+        workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/deploy'
+        artifactName: k8s
