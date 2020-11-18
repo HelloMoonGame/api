@@ -1,9 +1,11 @@
-# Docker
-# Build a Docker image 
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
-- main
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - build/character-api/azure-pipelines.yml
+    - src/CharacterApi/*
 
 resources:
 - repo: self
@@ -14,9 +16,34 @@ variables:
 stages:
 - stage: Build
   displayName: Build and Publish image
-  jobs:  
+  jobs:
+  - job: BuildContainersForPR
+    displayName: Build for Pull Request
+    condition: eq('${{ variables['Build.Reason'] }}', 'PullRequest')
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        repository: 'hellomoon/character-api'
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        tags: |
+          $(tag)
+        addPipelineData: false
+    - task: Docker@2
+      displayName: Publish an image
+      inputs:
+        containerRegistry: 'dockerHub'
+        repository: 'hellomoon/character-api'
+        command: 'push'
+        tags: |
+          $(tag)
+        addPipelineData: false
   - job: Build
-    displayName: Build
+    displayName: Build for Main
+    condition: ne('${{ variables['Build.Reason'] }}', 'PullRequest')
     pool:
       vmImage: 'ubuntu-latest'
     steps:
