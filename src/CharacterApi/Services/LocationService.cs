@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CharacterApi.Models;
@@ -15,6 +16,8 @@ namespace CharacterApi.Services
 
         private static readonly ConcurrentDictionary<Guid, CharacterLocation> CharacterLocations = new ();
 
+        public static IReadOnlyList<CharacterInfo> Characters =>
+            new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
 
         private readonly ILogger<LocationService> _logger;
         public LocationService(ILogger<LocationService> logger)
