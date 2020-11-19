@@ -11,11 +11,9 @@ namespace CharacterApi.Services
 {
     public class LocationService : Location.LocationBase
     {
-        private static readonly ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>> Subscriptions =
-            new ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>>();
+        private static readonly ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>> Subscriptions = new ();
 
-        private static readonly ConcurrentDictionary<Guid, CharacterLocation> CharacterLocations =
-            new ConcurrentDictionary<Guid, CharacterLocation>();
+        private static readonly ConcurrentDictionary<Guid, CharacterLocation> CharacterLocations = new ();
 
 
         private readonly ILogger<LocationService> _logger;
