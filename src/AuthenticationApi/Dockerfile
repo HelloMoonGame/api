@@ -23,4 +23,4 @@ COPY --from=build /src/AuthenticationApi/localhost.pfx /app/publish/
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "AuthenticationApi.dll"]
+ENTRYPOINT ["dotnet", "AuthenticationApi.dll", "/seed"]
