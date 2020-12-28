@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: hellomoon
+  name: authentication-db-config
+  labels:
+    app: authentication-db
+data:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: this_is_a_public_password
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  namespace: hellomoon
+  name: authentication-db-volume
+  labels:
+    type: local
+    app: authentication-db
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: hellomoon
+  name: authentication-db-volume-claim
+  labels:
+    app: authentication-db
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: hellomoon
+  name: authentication-db
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authentication-db
+    spec:
+      containers:
+        - name: authentication-db
+          image: postgres
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: authentication-db-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: authentication-db-volume-claim
