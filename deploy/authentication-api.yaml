@@ -37,7 +37,7 @@ spec:
           ports:
             - name: https
               containerPort: 443
-          environment:
+          env:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=authentication-db;Username=postgres;Password=this_is_a_public_password;Database=authdb"
             - name: GameUrl
