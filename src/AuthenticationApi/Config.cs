@@ -24,7 +24,7 @@ namespace AuthenticationApi
                 // interactive client using code flow + pkce
                 new Client
                 {
-                    ClientId = "interactive",
+                    ClientId = "game",
                     ClientSecrets = { new Secret("39861364-42fc-4147-b3aa-88248a00bc1b".Sha256()) },
 
                     AllowedGrantTypes = GrantTypes.Code,
