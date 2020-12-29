@@ -41,6 +41,20 @@ spec:
     requests:
       storage: 5Gi
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: hellomoon
+  name: authentication-db
+
+spec:
+  ports:
+    - protocol: TCP
+      name: postgresql
+      port: 5432
+  selector:
+    app: authentication-db
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
