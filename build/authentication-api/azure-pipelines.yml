@@ -1,0 +1,105 @@
+name: $(BuildID)
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - build/authentication-api/azure-pipelines.yml
+    - deploy/authentication-db.yaml
+    - deploy/authentication-api.yaml
+    - src/AuthenticationApi/*
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build and Publish image
+  jobs:
+  - job: BuildContainersForPR
+    displayName: Build for Pull Request
+    condition: ne('${{ variables['Build.SourceBranchName'] }}', 'main')
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        repository: 'hellomoon/authentication-api'
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/src/AuthenticationApi/Dockerfile'
+        tags: |
+          $(tag)
+        addPipelineData: false
+    - task: Docker@2
+      displayName: Publish an image
+      inputs:
+        containerRegistry: 'dockerHub'
+        repository: 'hellomoon/authentication-api'
+        command: 'push'
+        tags: |
+          $(tag)
+        addPipelineData: false
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/deploy'
+        Contents: |
+          authentication-db.yaml
+          authentication-api.yaml
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'sed -i "s/image: hellomoon\/authentication-api/image: hellomoon\/authentication-api:$(tag)/g" authentication-api.yaml'
+        workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/deploy'
+        artifactName: k8s
+  - job: Build
+    displayName: Build for Main
+    condition: eq('${{ variables['Build.SourceBranchName'] }}', 'main')
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        repository: 'hellomoon/authentication-api'
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/src/AuthenticationApi/Dockerfile'
+        tags: |
+          $(tag)
+          latest
+        addPipelineData: false
+    - task: Docker@2
+      displayName: Publish an image
+      inputs:
+        containerRegistry: 'dockerHub'
+        repository: 'hellomoon/authentication-api'
+        command: 'push'
+        tags: |
+          $(tag)
+          latest
+        addPipelineData: false
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/deploy'
+        Contents: |
+          authentication-db.yaml
+          authentication-api.yaml
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'sed -i "s/image: hellomoon\/authentication-api/image: hellomoon\/authentication-api:$(tag)/g" authentication-api.yaml'
+        workingDirectory: '$(Build.ArtifactStagingDirectory)/deploy'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)/deploy'
+        artifactName: k8s
