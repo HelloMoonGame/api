@@ -53,6 +53,16 @@ namespace AuthenticationApi
                 .AddAspNetIdentity<ApplicationUser>();
 
             // not recommended for production - you need to store your key material somewhere secure
+            // Example:
+            //var x509 = new X509Certificate2(
+            //File.ReadAllBytes(somefilename),somepassword);
+
+            //services.AddIdentityServer(options =>
+            //    {
+            //        the options I care about
+            //    })
+            //    .AddSigningCredential(x509)
+            //    .AddValidationKey(x509);
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
