@@ -7,6 +7,8 @@ trigger:
   paths:
     include:
     - build/authentication-api/azure-pipelines.yml
+    - deploy/authentication-db.yaml
+    - deploy/authentication-api.yaml
     - src/AuthenticationApi/*
 
 resources:
@@ -86,7 +88,9 @@ stages:
     - task: CopyFiles@2
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)/deploy'
-        Contents: 'authentication-api.yaml'
+        Contents: |
+          'authentication-db.yaml'
+          'authentication-api.yaml'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
     - task: Bash@3
       inputs:
