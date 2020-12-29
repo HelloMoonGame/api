@@ -41,13 +41,16 @@ spec:
     requests:
       storage: 5Gi
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: hellomoon
   name: authentication-db
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: authentication-db
   template:
     metadata:
       labels:
