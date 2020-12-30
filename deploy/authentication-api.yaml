@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: hellomoon
+  name: authentication-api
+
+spec:
+  ports:
+    - protocol: TCP
+      name: https
+      port: 443
+  selector:
+    app: authentication-api
+    
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: hellomoon
+  name: authentication-api
+  labels:
+    app: authentication-api
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentication-api
+  template:
+    metadata:
+      labels:
+        app: authentication-api
+    spec:
+      containers:
+        - name: authentication-api
+          image: hellomoon/authentication-api
+          ports:
+            - name: https
+              containerPort: 443
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=authentication-db;Username=postgres;Password=this_is_a_public_password;Database=authdb"
+            - name: GameUrl
+              value: "https://game.hellomoon.nl"
+
+---
+kind: IngressRoute
+apiVersion: traefik.containo.us/v1alpha1
+metadata:
+  namespace: hellomoon
+  name: character-api-ingressroutetls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`auth.hellomoon.nl`)
+    kind: Rule
+    services:
+    - name: authentication-api
+      port: 443
+      scheme: https
+  tls:
+    certResolver: myresolver
