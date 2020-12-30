@@ -7,6 +7,7 @@ trigger:
   paths:
     include:
     - build/character-api/azure-pipelines.yml
+    - deploy/character-api.yaml
     - src/CharacterApi/*
 
 resources:
@@ -21,7 +22,7 @@ stages:
   jobs:
   - job: BuildContainersForPR
     displayName: Build for Pull Request
-    condition: eq('${{ variables['Build.Reason'] }}', 'PullRequest')
+    condition: ne('${{ variables['Build.SourceBranchName'] }}', 'main')
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -59,7 +60,7 @@ stages:
         artifactName: k8s
   - job: Build
     displayName: Build for Main
-    condition: ne('${{ variables['Build.Reason'] }}', 'PullRequest')
+    condition: eq('${{ variables['Build.SourceBranchName'] }}', 'main')
     pool:
       vmImage: 'ubuntu-latest'
     steps:
