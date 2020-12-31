@@ -48,7 +48,7 @@ kind: IngressRoute
 apiVersion: traefik.containo.us/v1alpha1
 metadata:
   namespace: hellomoon
-  name: character-api-ingressroutetls
+  name: authentication-api-ingressroutetls
 spec:
   entryPoints:
     - websecure
