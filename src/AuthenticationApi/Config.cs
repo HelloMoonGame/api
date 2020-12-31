@@ -28,8 +28,9 @@ namespace AuthenticationApi
                     ClientSecrets = { new Secret("39861364-42fc-4147-b3aa-88248a00bc1b".Sha256()) },
 
                     AllowedGrantTypes = GrantTypes.Code,
+                    RequirePkce = false,
 
-                    RedirectUris = { gameUrl + "/signin-oidc" },
+                    RedirectUris = { gameUrl + "/api/auth/callback/identity-server4" },
                     FrontChannelLogoutUri = gameUrl + "/signout-oidc",
                     PostLogoutRedirectUris = { gameUrl + "/signout-callback-oidc" },
 
