@@ -34,3 +34,5 @@ services:
     restart: always
     ports:
       - 5001:443
+    environment:
+      AuthenticationApiUrl: https://localhost:5000
