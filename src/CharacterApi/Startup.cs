@@ -16,13 +16,22 @@ namespace CharacterApi
             services.AddMvc();
             services.AddGrpc();
 
-            services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            services.AddCors(o =>
             {
-                builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
-            }));
+                o.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+                o.AddPolicy("AllowAllGrpc", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+                });
+            });
 
             services.AddAuthorization(options =>
             {
@@ -62,7 +71,7 @@ namespace CharacterApi
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<LocationService>().EnableGrpcWeb().RequireCors("AllowAll");
+                endpoints.MapGrpcService<LocationService>().EnableGrpcWeb().RequireCors("AllowAllGrpc");
 
                 endpoints.MapControllerRoute(
                     name: "default",
