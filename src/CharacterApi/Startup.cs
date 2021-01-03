@@ -23,6 +23,15 @@ namespace CharacterApi
                     .AllowAnyHeader()
                     .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
             }));
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("default", builder =>
+                {
+                    builder.RequireClaim("scope", "characterapi");
+                });
+                options.DefaultPolicy = options.GetPolicy("default") ?? options.DefaultPolicy;
+            });
             
             services.AddAuthentication(options =>
                 {
@@ -49,6 +58,7 @@ namespace CharacterApi
             app.UseCors();
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
