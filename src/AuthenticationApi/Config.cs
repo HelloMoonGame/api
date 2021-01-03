@@ -15,13 +15,12 @@ namespace AuthenticationApi
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
-                new ApiScope("characterapi"),
+                new ("characterapi"),
             };
 
         public static IEnumerable<Client> Clients(string gameUrl) =>
-            new Client[]
+            new []
             {
-                // interactive client using code flow + pkce
                 new Client
                 {
                     ClientId = "game",
@@ -31,10 +30,7 @@ namespace AuthenticationApi
                     RequirePkce = false,
 
                     RedirectUris = { gameUrl + "/api/auth/callback/identity-server4" },
-                    FrontChannelLogoutUri = gameUrl + "/signout-oidc",
-                    PostLogoutRedirectUris = { gameUrl + "/signout-callback-oidc" },
-
-                    AllowOfflineAccess = true,
+                    
                     AllowedScopes = { "openid", "profile", "characterapi" },
                     
                     RequireConsent = false
