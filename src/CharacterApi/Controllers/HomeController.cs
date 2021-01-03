@@ -9,9 +9,9 @@ namespace CharacterApi.Controllers
         {
             var result = "<html>" +
                 "<head><title>HelloMoon Character API</title></head>" +
-                "<body><h1>HelloMoon Character API</h1><br /><table>";
-            foreach (var character in LocationService.Characters)
-                result += $"<tr><td>{character.Guid}</td><td>{character.X},{character.Y}</tr>";
+                "<body><h1>HelloMoon Character API</h1><br /><table cellspacing='10'>";
+            for (var i = 0; i < LocationService.Characters.Count; i++)
+                result += $"<tr><td>Character #{i+1}</td><td>{LocationService.Characters[i].X},{LocationService.Characters[i].Y}</tr>";
             result += "</table></body></html>";
 
             return Content(result, "text/html");
