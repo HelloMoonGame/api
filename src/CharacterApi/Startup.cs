@@ -55,7 +55,7 @@ namespace CharacterApi
             app.UseRouting();
 
             app.UseGrpcWeb();
-            app.UseCors();
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
