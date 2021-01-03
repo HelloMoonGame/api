@@ -10,6 +10,20 @@ spec:
       - /character
 
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: hellomoon
+  name: character-api-corsheader
+spec:
+  headers:
+    customResponseHeaders:
+      Access-Control-Allow-Headers: authorization,content-type,x-grpc-web,x-user-agent
+      Access-Control-Allow-Methods: "*"
+      Access-Control-Allow-Origin: "*"
+      Access-Control-Expose-Headers: Grpc-Status,Grpc-Message,Grpc-Encoding,Grpc-Accept-Encoding
+
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -68,6 +82,8 @@ spec:
       scheme: https
     middlewares:
     - name: character-api-stripprefix
+      namespace: hellomoon
+    - name: character-api-corsheader
       namespace: hellomoon
   tls:
     certResolver: myresolver
