@@ -1,7 +1,7 @@
 ﻿using CharacterApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,6 +23,16 @@ namespace CharacterApi
                     .AllowAnyHeader()
                     .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
             }));
+            
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.MetadataAddress = "https://localhost:5000/.well-known/openid-configuration";
+                    options.TokenValidationParameters.ValidateAudience = false;
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,6 +47,8 @@ namespace CharacterApi
 
             app.UseGrpcWeb();
             app.UseCors();
+
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

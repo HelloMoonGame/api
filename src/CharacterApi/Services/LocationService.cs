@@ -6,10 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using CharacterApi.Models;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace CharacterApi.Services
 {
+    [Authorize]
     public class LocationService : Location.LocationBase
     {
         private static readonly ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>> Subscriptions = new ();
