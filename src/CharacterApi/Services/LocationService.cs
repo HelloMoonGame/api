@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using CharacterApi.Models;
 using Grpc.Core;
@@ -104,9 +105,11 @@ namespace CharacterApi.Services
 
         public override async Task Subscribe(Empty request, IServerStreamWriter<LocationUpdateResponse> responseStream, ServerCallContext context)
         {
-            var characterGuid = Guid.NewGuid();
+            var user = context.GetHttpContext().User;
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userGuid = Guid.Parse(userId);
 
-            AddSubscription(characterGuid, responseStream);
+            AddSubscription(userGuid, responseStream);
 
             var message = new LocationUpdateResponse();
             lock (CharacterLocations)
@@ -127,7 +130,7 @@ namespace CharacterApi.Services
             }
             catch (TaskCanceledException)
             {
-                RemoveSubscription(characterGuid, responseStream);
+                RemoveSubscription(userGuid, responseStream);
             }
         }
     }
