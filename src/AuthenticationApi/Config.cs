@@ -27,9 +27,9 @@ namespace AuthenticationApi
                     ClientSecrets = { new Secret("39861364-42fc-4147-b3aa-88248a00bc1b".Sha256()) },
 
                     AllowedGrantTypes = GrantTypes.Code,
-                    RequirePkce = false,
+                    RequirePkce = true,
 
-                    RedirectUris = { gameUrl + "/api/auth/callback/identity-server4" },
+                    RedirectUris = { gameUrl + "/auth/signin-callback", gameUrl + "/auth/renew-callback" },
                     
                     AllowedScopes = { "openid", "profile", "characterapi" },
                     

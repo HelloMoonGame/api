@@ -56,7 +56,7 @@ namespace CharacterApi
                 })
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
-                    options.MetadataAddress = $"{Configuration["AuthenticationApiUrl"]}/.well-known/openid-configuration";
+                    options.Authority = Configuration["AuthenticationApiUrl"];
                     options.TokenValidationParameters.ValidateAudience = false;
                 });
         }
