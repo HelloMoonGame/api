@@ -184,7 +184,54 @@ namespace IdentityServerHost.Quickstart.UI
             return View(vm);
         }
 
-        
+        /// <summary>
+        /// Check if login is already approved
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CheckLoginApproval(LoginAttemptInputModel model)
+        {
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+            var returnUrl = context != null ? model.ReturnUrl : GetLocalReturnUrl(model.ReturnUrl);
+            
+            // validate login attempt
+            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            if (loginAttempt == null || DateTime.UtcNow > loginAttempt.ExpiryDate)
+            {
+                if (context != null) await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+                
+                return Json(new
+                {
+                    Expired = true,
+                    ReturnUrl = returnUrl
+                });
+            }
+            
+            // if login attempt is accepted, forward to returnUrl
+            if (loginAttempt.Accepted)
+            {
+                var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
+                await _signInManager.SignInAsync(user, model.RememberLogin, "email");
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.UserName,
+                    clientId: context?.Client.ClientId));
+
+                _dbContext.LoginAttempts.Remove(loginAttempt);
+                await _dbContext.SaveChangesAsync();
+                
+                return Json(new
+                {
+                    Approved = true,
+                    ReturnUrl = returnUrl
+                });
+            }
+
+            // please retry later
+            return Json(new
+            {
+                Approved = false
+            });
+        }
+
         /// <summary>
         /// Show logout page
         /// </summary>
