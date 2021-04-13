@@ -1,0 +1,19 @@
+﻿@model LoginAttemptConfirmViewModel
+
+<div class="logout-page">
+    <div class="lead">
+        <h1>Login</h1>
+        @if (Model.ExpiredOrNonExisting)
+        {
+            <p>This confirmation URL is not valid (anymore). Please close this window and start the authentication process again.</p>
+        }
+        else if (Model.WasAlreadyConfirmed)
+        {
+            <p>This login attempt was already confirmed. Please close this window and return to the original browser tab.</p>
+        }
+        else
+        {
+            <p>Login has been confirmed! Please close this window and return to the original browser tab.</p>
+        }
+    </div>
+</div>

@@ -233,6 +233,30 @@ namespace IdentityServerHost.Quickstart.UI
         }
 
         /// <summary>
+        /// Handle click from login-email
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ConfirmLogin(LoginAttemptConfirmInputModel model)
+        {
+            var viewModel = new LoginAttemptConfirmViewModel
+            {
+                Id = model.Id
+            };
+            
+            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            viewModel.ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow;
+            viewModel.WasAlreadyConfirmed = loginAttempt?.Accepted ?? false;
+            
+            if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
+            {
+                loginAttempt.Accepted = true;
+                await _dbContext.SaveChangesAsync();
+            }
+            
+            return View(viewModel);
+        }
+
+        /// <summary>
         /// Show logout page
         /// </summary>
         [HttpGet]
