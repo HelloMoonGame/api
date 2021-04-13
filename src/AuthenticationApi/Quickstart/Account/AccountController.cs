@@ -11,12 +11,14 @@ using IdentityServer4.Stores;
 using AuthenticationApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AuthenticationApi.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityServerHost.Quickstart.UI
 {
@@ -26,6 +28,7 @@ namespace IdentityServerHost.Quickstart.UI
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDbContext _dbContext;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -34,6 +37,7 @@ namespace IdentityServerHost.Quickstart.UI
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            ApplicationDbContext dbContext,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
@@ -41,6 +45,7 @@ namespace IdentityServerHost.Quickstart.UI
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -65,6 +70,78 @@ namespace IdentityServerHost.Quickstart.UI
             return View(vm);
         }
 
+        private IActionResult RedirectToReturnUrl(AuthorizationRequest context, string returnUrl)
+        {
+            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+            if (context != null && context.IsNativeClient())
+            {
+                // The client is native, so this change in how to
+                // return the response is for better UX for the end user.
+                return this.LoadingPage("Redirect", returnUrl);
+            }
+
+            return Redirect(returnUrl);
+        }
+
+        private string GetLocalReturnUrl(string returnUrl)
+        {
+            // request for a local page
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return returnUrl;
+            }
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                return "/";
+            }
+
+            // user might have clicked on a malicious link - should be logged
+            throw new Exception("invalid return URL");
+        }
+
+        private async Task<IActionResult> CancelLogin(AuthorizationRequest context, string returnUrl)
+        {
+            if (context != null)
+            {
+                // if the user cancels, send a result back into IdentityServer as if they 
+                // denied the consent (even if this client does not require consent).
+                // this will send back an access denied OIDC error response to the client.
+                await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+
+                return RedirectToReturnUrl(context, returnUrl);
+            }
+            else
+            {
+                // since we don't have a valid context, then we just go back to the home page
+                return Redirect("/");
+            }
+        }
+
+        private async Task<ApplicationUser> CreateUser(string email)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = false,
+            };
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.First().Description);
+            }
+
+            result = await _userManager.AddClaimsAsync(user, new[]{
+                new Claim(JwtClaimTypes.Email, user.Email)
+            });
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.First().Description);
+            }
+
+            return user;
+        }
+        
         /// <summary>
         /// Handle postback from email login
         /// </summary>
@@ -78,28 +155,7 @@ namespace IdentityServerHost.Quickstart.UI
             // the user clicked the "cancel" button
             if (button != "login")
             {
-                if (context != null)
-                {
-                    // if the user cancels, send a result back into IdentityServer as if they 
-                    // denied the consent (even if this client does not require consent).
-                    // this will send back an access denied OIDC error response to the client.
-                    await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
-
-                    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                    if (context.IsNativeClient())
-                    {
-                        // The client is native, so this change in how to
-                        // return the response is for better UX for the end user.
-                        return this.LoadingPage("Redirect", model.ReturnUrl);
-                    }
-
-                    return Redirect(model.ReturnUrl);
-                }
-                else
-                {
-                    // since we don't have a valid context, then we just go back to the home page
-                    return Redirect("~/");
-                }
+                return await CancelLogin(context, model.ReturnUrl);
             }
 
             if (ModelState.IsValid)
@@ -107,39 +163,20 @@ namespace IdentityServerHost.Quickstart.UI
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null)
                 {
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
-
-                    if (context != null)
-                    {
-                        if (context.IsNativeClient())
-                        {
-                            // The client is native, so this change in how to
-                            // return the response is for better UX for the end user.
-                            return this.LoadingPage("Redirect", model.ReturnUrl);
-                        }
-
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                        return Redirect(model.ReturnUrl);
-                    }
-
-                    // request for a local page
-                    if (Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else if (string.IsNullOrEmpty(model.ReturnUrl))
-                    {
-                        return Redirect("~/");
-                    }
-                    else
-                    {
-                        // user might have clicked on a malicious link - should be logged
-                        throw new Exception("invalid return URL");
-                    }
+                    user = await CreateUser(model.Email);
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                var loginAttempt = new LoginAttempt(user.Id, TimeSpan.FromMinutes(10));
+                await _dbContext.LoginAttempts.AddAsync(loginAttempt);
+                await _dbContext.SaveChangesAsync();
+                
+                return View("WaitForLoginApproval", new LoginAttemptViewModel
+                {
+                    ReturnUrl = model.ReturnUrl,
+                    RememberLogin = model.RememberLogin,
+                    Id = loginAttempt.Id,
+                    ExpiryDate = loginAttempt.ExpiryDate
+                });
             }
 
             // something went wrong, show form with error
