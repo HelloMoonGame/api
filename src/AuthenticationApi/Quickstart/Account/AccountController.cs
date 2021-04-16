@@ -165,20 +165,26 @@ namespace IdentityServerHost.Quickstart.UI
                 await _dbContext.SaveChangesAsync();
 
                 var mailService = new MailService();
+                var confirmUrl = $"{Request.Scheme}://{Request.Host}" + Url.Action(nameof(ConfirmLogin),
+                    new LoginAttemptConfirmInputModel
+                    {
+                        Id = loginAttempt.Id,
+                        Secret = loginAttempt.Secret
+                    });
+                
                 if (!user.EmailConfirmed)
                 {
-
+                    mailService.SendMail(this, model.Email, new NewUserEmailModel
+                    {
+                        ConfirmUrl = confirmUrl,
+                        Email = user.Email,
+                    });
                 }
                 else
                 {
                     mailService.SendMail(this, model.Email, new LoginEmailModel
                     {
-                        ConfirmUrl = $"{Request.Scheme}://{Request.Host}" + Url.Action(nameof(ConfirmLogin),
-                            new LoginAttemptConfirmInputModel
-                            {
-                                Id = loginAttempt.Id,
-                                Secret = loginAttempt.Secret
-                            }),
+                        ConfirmUrl = confirmUrl,
                         Email = user.Email,
                     });
                 }
