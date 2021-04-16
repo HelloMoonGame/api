@@ -14,6 +14,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthenticationApi.Data;
+using AuthenticationApi.Models.Email;
+using AuthenticationApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityServerHost.Quickstart.UI
@@ -161,7 +163,26 @@ namespace IdentityServerHost.Quickstart.UI
                 var loginAttempt = new LoginAttempt(user.Id, TimeSpan.FromMinutes(10));
                 await _dbContext.LoginAttempts.AddAsync(loginAttempt);
                 await _dbContext.SaveChangesAsync();
-                
+
+                var mailService = new MailService();
+                if (!user.EmailConfirmed)
+                {
+
+                }
+                else
+                {
+                    mailService.SendMail(this, model.Email, new LoginEmailModel
+                    {
+                        ConfirmUrl = $"{Request.Scheme}://{Request.Host}" + Url.Action(nameof(ConfirmLogin),
+                            new LoginAttemptConfirmInputModel
+                            {
+                                Id = loginAttempt.Id,
+                                Secret = loginAttempt.Secret
+                            }),
+                        Email = user.Email,
+                    });
+                }
+
                 return View("WaitForLoginApproval", new LoginAttemptViewModel
                 {
                     ReturnUrl = model.ReturnUrl,
