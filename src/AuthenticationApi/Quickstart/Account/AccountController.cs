@@ -139,7 +139,17 @@ namespace IdentityServerHost.Quickstart.UI
 
             return user;
         }
-        
+
+        private async Task CancelLoginAttemptsForUserId(string userId)
+        {
+            var loginAttempts = await _dbContext.LoginAttempts.Where(l => l.UserId == userId).ToListAsync();
+            if (loginAttempts.Any())
+            {
+                loginAttempts.ForEach(l => _dbContext.Remove(l));
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
         /// <summary>
         /// Handle postback from email login
         /// </summary>
@@ -160,6 +170,8 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
 
+                await CancelLoginAttemptsForUserId(user.Id);
+                
                 var loginAttempt = new LoginAttempt(user.Id, TimeSpan.FromMinutes(10));
                 await _dbContext.LoginAttempts.AddAsync(loginAttempt);
                 await _dbContext.SaveChangesAsync();
@@ -171,7 +183,7 @@ namespace IdentityServerHost.Quickstart.UI
                         Id = loginAttempt.Id,
                         Secret = loginAttempt.Secret
                     });
-                
+
                 if (!user.EmailConfirmed)
                 {
                     mailService.SendMail(this, model.Email, new NewUserEmailModel
@@ -189,18 +201,46 @@ namespace IdentityServerHost.Quickstart.UI
                     });
                 }
 
-                return View("WaitForLoginApproval", new LoginAttemptViewModel
+                return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
                 {
-                    ReturnUrl = model.ReturnUrl,
-                    RememberLogin = model.RememberLogin,
                     Id = loginAttempt.Id,
-                    ExpiryDate = loginAttempt.ExpiryDate
+                    RememberLogin = model.RememberLogin,
+                    ReturnUrl = model.ReturnUrl
                 });
             }
 
             // something went wrong, show form with error
             var vm = await BuildLoginViewModelAsync(model);
             return View(vm);
+        }
+
+        /// <summary>
+        /// Wait dor approval of the login attempt
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> WaitForLoginApproval(LoginAttemptInputModel model, string button)
+        {
+            if (model == null)
+                return BadRequest();
+            
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+
+            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            if (loginAttempt == null)
+                return await CancelLogin(context, model.ReturnUrl);
+
+            var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
+            if (user == null)
+                return await CancelLogin(context, model.ReturnUrl);
+
+            return View("WaitForLoginApproval", new LoginAttemptViewModel
+            {
+                ReturnUrl = model.ReturnUrl,
+                RememberLogin = model.RememberLogin,
+                Id = loginAttempt.Id,
+                ExpiryDate = loginAttempt.ExpiryDate
+            });
         }
 
         /// <summary>
@@ -212,20 +252,20 @@ namespace IdentityServerHost.Quickstart.UI
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
             var returnUrl = context != null ? model.ReturnUrl : GetLocalReturnUrl(model.ReturnUrl);
-            
+
             // validate login attempt
             var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
             if (loginAttempt == null || DateTime.UtcNow > loginAttempt.ExpiryDate)
             {
                 if (context != null) await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
-                
+
                 return Json(new
                 {
                     Expired = true,
                     ReturnUrl = returnUrl
                 });
             }
-            
+
             // if login attempt is accepted, forward to returnUrl
             if (loginAttempt.Accepted)
             {
@@ -236,7 +276,7 @@ namespace IdentityServerHost.Quickstart.UI
 
                 _dbContext.LoginAttempts.Remove(loginAttempt);
                 await _dbContext.SaveChangesAsync();
-                
+
                 return Json(new
                 {
                     Approved = true,
@@ -261,17 +301,17 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 Id = model.Id
             };
-            
+
             var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
             viewModel.ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow;
             viewModel.WasAlreadyConfirmed = loginAttempt?.Accepted ?? false;
-            
+
             if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
             {
                 loginAttempt.Accepted = true;
                 await _dbContext.SaveChangesAsync();
             }
-            
+
             return View(viewModel);
         }
 
