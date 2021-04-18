@@ -140,6 +140,12 @@ namespace IdentityServerHost.Quickstart.UI
             return user;
         }
 
+        private async Task DeleteLoginAttempt(LoginAttempt loginAttempt)
+        {
+            _dbContext.LoginAttempts.Remove(loginAttempt);
+            await _dbContext.SaveChangesAsync();
+        }
+
         private async Task CancelLoginAttemptsForUserId(string userId)
         {
             var loginAttempts = await _dbContext.LoginAttempts.Where(l => l.UserId == userId).ToListAsync();
@@ -171,7 +177,7 @@ namespace IdentityServerHost.Quickstart.UI
                 var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
 
                 await CancelLoginAttemptsForUserId(user.Id);
-                
+
                 var loginAttempt = new LoginAttempt(user.Id, TimeSpan.FromMinutes(10));
                 await _dbContext.LoginAttempts.AddAsync(loginAttempt);
                 await _dbContext.SaveChangesAsync();
@@ -222,7 +228,7 @@ namespace IdentityServerHost.Quickstart.UI
         {
             if (model == null)
                 return BadRequest();
-            
+
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
@@ -274,8 +280,7 @@ namespace IdentityServerHost.Quickstart.UI
                 await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.UserName,
                     clientId: context?.Client.ClientId));
 
-                _dbContext.LoginAttempts.Remove(loginAttempt);
-                await _dbContext.SaveChangesAsync();
+                await DeleteLoginAttempt(loginAttempt);
 
                 return Json(new
                 {
@@ -297,19 +302,33 @@ namespace IdentityServerHost.Quickstart.UI
         [HttpGet]
         public async Task<IActionResult> ConfirmLogin(LoginAttemptConfirmInputModel model)
         {
-            var viewModel = new LoginAttemptConfirmViewModel
-            {
-                Id = model.Id
-            };
-
             var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
-            viewModel.ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow;
-            viewModel.WasAlreadyConfirmed = loginAttempt?.Accepted ?? false;
+            var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
 
-            if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Handle click from login-email
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmLoginFinish(LoginAttemptConfirmInputModel model, string button)
+        {
+            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
+
+            // the user clicked the "cancel" button
+            if (button != "yes")
+            {
+                await DeleteLoginAttempt(loginAttempt);
+            }
+            else if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
             {
                 loginAttempt.Accepted = true;
                 await _dbContext.SaveChangesAsync();
+
+                viewModel.Accepted = true;
             }
 
             return View(viewModel);
@@ -378,6 +397,16 @@ namespace IdentityServerHost.Quickstart.UI
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
+        private LoginAttemptConfirmViewModel BuildLoginAttemptConfirmViewModel(LoginAttempt loginAttempt)
+        {
+            return new LoginAttemptConfirmViewModel
+            {
+                Id = loginAttempt?.Id,
+                ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow,
+                WasAlreadyConfirmed = loginAttempt?.Accepted ?? false
+            };
+        }
+
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);

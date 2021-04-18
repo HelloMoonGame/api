@@ -11,15 +11,13 @@
         {
             <p>This login attempt was already confirmed. Please close this window and return to the original browser tab.</p>
         }
+        else if (Model.Accepted)
+        {
+            <p>Login has been confirmed! Please close this window and return to the original browser tab.</p>
+        }
         else
         {
-            <form asp-action="ConfirmLoginFinish">
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="Secret" />
-                <p>Do you want to accept the login attempt and give access to your account?</p>
-                <button class="btn btn-primary" name="button" value="yes">Yes</button>
-                <button class="btn btn-secondary" name="button" value="no">No</button>
-            </form>
+            <p>Login attempt was cancelled!</p>
         }
     </div>
 </div>
