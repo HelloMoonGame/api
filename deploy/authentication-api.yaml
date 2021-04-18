@@ -40,6 +40,8 @@ spec:
           env:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=authentication-db;Username=postgres;Password=this_is_a_public_password;Database=authdb"
+            - name: AuthenticationApiUrl
+              value: "https://auth.hellomoon.nl"
             - name: GameUrl
               value: "https://game.hellomoon.nl"
 

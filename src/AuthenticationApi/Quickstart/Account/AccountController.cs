@@ -171,6 +171,7 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 return await CancelLogin(context, model.ReturnUrl);
             }
+            var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
 
             if (ModelState.IsValid)
             {
@@ -183,7 +184,6 @@ namespace IdentityServerHost.Quickstart.UI
                 await _dbContext.SaveChangesAsync();
 
                 var mailService = new MailService();
-                var confirmUrl = $"{Request.Scheme}://{Request.Host}" + Url.Action(nameof(ConfirmLogin),
                     new LoginAttemptConfirmInputModel
                     {
                         Id = loginAttempt.Id,
