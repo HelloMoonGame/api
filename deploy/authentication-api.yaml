@@ -50,17 +50,17 @@ spec:
             - name: Mail__SmtpPort
               valueFrom:
                 secretKeyRef:
-                  name: mailsettings
+                  name: smtpsettings
                   key: port
             - name: Mail__SmtpUserName
               valueFrom:
                 secretKeyRef:
-                  name: mailsettings
+                  name: smtpsettings
                   key: username
             - name: Mail__SmtpPassword
               valueFrom:
                 secretKeyRef:
-                  name: mailsettings
+                  name: smtpsettings
                   key: password
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
