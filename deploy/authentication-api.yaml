@@ -40,6 +40,30 @@ spec:
           env:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=authentication-db;Username=postgres;Password=this_is_a_public_password;Database=authdb"
+            - name: Mail__DeliveryMethod
+              value: "Network"
+            - name: Mail__SmtpHost
+              valueFrom:
+                secretKeyRef:
+                  name: smtpsettings
+                  key: host
+            - name: Mail__SmtpPort
+              valueFrom:
+                secretKeyRef:
+                  name: mailsettings
+                  key: port
+            - name: Mail__SmtpUserName
+              valueFrom:
+                secretKeyRef:
+                  name: mailsettings
+                  key: username
+            - name: Mail__SmtpPassword
+              valueFrom:
+                secretKeyRef:
+                  name: mailsettings
+                  key: password
+            - name: AuthenticationApiUrl
+              value: "https://auth.hellomoon.nl"
             - name: GameUrl
               value: "https://game.hellomoon.nl"
 

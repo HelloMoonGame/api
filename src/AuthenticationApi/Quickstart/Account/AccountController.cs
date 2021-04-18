@@ -1,8 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityModel;
+﻿using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -11,12 +7,17 @@ using IdentityServer4.Stores;
 using AuthenticationApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AuthenticationApi.Data;
+using AuthenticationApi.Models.Email;
+using AuthenticationApi.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace IdentityServerHost.Quickstart.UI
 {
@@ -26,25 +27,34 @@ namespace IdentityServerHost.Quickstart.UI
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDbContext _dbContext;
+        private readonly IConfiguration _configuration;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
+        private readonly IMailService _mailService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            ApplicationDbContext dbContext,
+            IConfiguration configuration,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events)
+            IEventService events,
+            IMailService mailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
+            _configuration = configuration;
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
+            _mailService = mailService;
         }
 
         /// <summary>
@@ -65,8 +75,105 @@ namespace IdentityServerHost.Quickstart.UI
             return View(vm);
         }
 
+        private IActionResult RedirectToReturnUrl(AuthorizationRequest context, string returnUrl)
+        {
+            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+            if (context != null && context.IsNativeClient())
+            {
+                // The client is native, so this change in how to
+                // return the response is for better UX for the end user.
+                return this.LoadingPage("Redirect", returnUrl);
+            }
+
+            return Redirect(returnUrl);
+        }
+
+        private string GetLocalReturnUrl(string returnUrl)
+        {
+            // request for a local page
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return returnUrl;
+            }
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                return "/";
+            }
+
+            // user might have clicked on a malicious link - should be logged
+            throw new Exception("invalid return URL");
+        }
+
+        private async Task<IActionResult> CancelLogin(AuthorizationRequest context, string returnUrl)
+        {
+            if (context != null)
+            {
+                // if the user cancels, send a result back into IdentityServer as if they 
+                // denied the consent (even if this client does not require consent).
+                // this will send back an access denied OIDC error response to the client.
+                await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+
+                return RedirectToReturnUrl(context, returnUrl);
+            }
+            else
+            {
+                // since we don't have a valid context, then we just go back to the home page
+                return Redirect("/");
+            }
+        }
+
+        private async Task<ApplicationUser> CreateUser(string email)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = false,
+            };
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.First().Description);
+            }
+
+            result = await _userManager.AddClaimsAsync(user, new[]{
+                new Claim(JwtClaimTypes.Email, user.Email)
+            });
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.First().Description);
+            }
+
+            return user;
+        }
+
+        private async Task DeleteLoginAttempt(LoginAttempt loginAttempt)
+        {
+            _dbContext.LoginAttempts.Remove(loginAttempt);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private async Task CancelLoginAttemptsForUserId(string userId)
+        {
+            var loginAttempts = await _dbContext.LoginAttempts.Where(l => l.UserId == userId).ToListAsync();
+            if (loginAttempts.Any())
+            {
+                loginAttempts.ForEach(l => _dbContext.Remove(l));
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        private async Task<LoginAttempt> CreateLoginAttempt(string userId)
+        {
+            var loginAttempt = new LoginAttempt(userId, TimeSpan.FromMinutes(10));
+            await _dbContext.LoginAttempts.AddAsync(loginAttempt);
+            await _dbContext.SaveChangesAsync();
+
+            return loginAttempt;
+        }
+
         /// <summary>
-        /// Handle postback from username/password login
+        /// Handle postback from email login
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -78,77 +185,162 @@ namespace IdentityServerHost.Quickstart.UI
             // the user clicked the "cancel" button
             if (button != "login")
             {
-                if (context != null)
-                {
-                    // if the user cancels, send a result back into IdentityServer as if they 
-                    // denied the consent (even if this client does not require consent).
-                    // this will send back an access denied OIDC error response to the client.
-                    await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
-
-                    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                    if (context.IsNativeClient())
-                    {
-                        // The client is native, so this change in how to
-                        // return the response is for better UX for the end user.
-                        return this.LoadingPage("Redirect", model.ReturnUrl);
-                    }
-
-                    return Redirect(model.ReturnUrl);
-                }
-                else
-                {
-                    // since we don't have a valid context, then we just go back to the home page
-                    return Redirect("~/");
-                }
+                return await CancelLogin(context, model.ReturnUrl);
             }
+            
+            var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
 
-            if (ModelState.IsValid)
+            await CancelLoginAttemptsForUserId(user.Id);
+            var loginAttempt = await CreateLoginAttempt(user.Id);
+            
+            var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
+                new LoginAttemptConfirmInputModel
+                {
+                    Id = loginAttempt.Id,
+                    Secret = loginAttempt.Secret
+                });
+
+            if (!user.EmailConfirmed)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: true);
-                if (result.Succeeded)
+                _mailService.SendMail(this, model.Email, new NewUserEmailModel
                 {
-                    var user = await _userManager.FindByNameAsync(model.Username);
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
-
-                    if (context != null)
-                    {
-                        if (context.IsNativeClient())
-                        {
-                            // The client is native, so this change in how to
-                            // return the response is for better UX for the end user.
-                            return this.LoadingPage("Redirect", model.ReturnUrl);
-                        }
-
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                        return Redirect(model.ReturnUrl);
-                    }
-
-                    // request for a local page
-                    if (Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else if (string.IsNullOrEmpty(model.ReturnUrl))
-                    {
-                        return Redirect("~/");
-                    }
-                    else
-                    {
-                        // user might have clicked on a malicious link - should be logged
-                        throw new Exception("invalid return URL");
-                    }
-                }
-
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
+                });
+            }
+            else
+            {
+                _mailService.SendMail(this, model.Email, new LoginEmailModel
+                {
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
+                });
             }
 
-            // something went wrong, show form with error
-            var vm = await BuildLoginViewModelAsync(model);
-            return View(vm);
+            return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
+            {
+                Id = loginAttempt.Id,
+                RememberLogin = model.RememberLogin,
+                ReturnUrl = model.ReturnUrl
+            });
         }
 
-        
+        /// <summary>
+        /// Wait dor approval of the login attempt
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> WaitForLoginApproval(LoginAttemptInputModel model, string button)
+        {
+            if (model == null)
+                return BadRequest();
+
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+
+            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            if (loginAttempt == null)
+                return await CancelLogin(context, model.ReturnUrl);
+
+            var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
+            if (user == null)
+                return await CancelLogin(context, model.ReturnUrl);
+
+            return View("WaitForLoginApproval", new LoginAttemptViewModel
+            {
+                ReturnUrl = model.ReturnUrl,
+                RememberLogin = model.RememberLogin,
+                Id = loginAttempt.Id,
+                ExpiryDate = loginAttempt.ExpiryDate
+            });
+        }
+
+        /// <summary>
+        /// Check if login is already approved
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CheckLoginApproval(LoginAttemptInputModel model)
+        {
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+            var returnUrl = context != null ? model.ReturnUrl : GetLocalReturnUrl(model.ReturnUrl);
+
+            // validate login attempt
+            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            if (loginAttempt == null || DateTime.UtcNow > loginAttempt.ExpiryDate)
+            {
+                if (context != null) await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+
+                return Json(new
+                {
+                    Expired = true,
+                    ReturnUrl = returnUrl
+                });
+            }
+
+            // if login attempt is accepted, forward to returnUrl
+            if (loginAttempt.Accepted)
+            {
+                var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
+                await _signInManager.SignInAsync(user, model.RememberLogin, "email");
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.UserName,
+                    clientId: context?.Client.ClientId));
+
+                await DeleteLoginAttempt(loginAttempt);
+
+                return Json(new
+                {
+                    Approved = true,
+                    ReturnUrl = returnUrl
+                });
+            }
+
+            // please retry later
+            return Json(new
+            {
+                Approved = false
+            });
+        }
+
+        /// <summary>
+        /// Handle click from login-email
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ConfirmLogin(LoginAttemptConfirmInputModel model)
+        {
+            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
+            
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Handle click from login-email
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmLoginFinish(LoginAttemptConfirmInputModel model, string button)
+        {
+            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
+
+            // the user clicked the "cancel" button
+            if (button != "yes")
+            {
+                await DeleteLoginAttempt(loginAttempt);
+            }
+            else if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
+            {
+                loginAttempt.Accepted = true;
+                var user = await _dbContext.Users.SingleAsync(u => u.Id == loginAttempt.UserId);
+                user.EmailConfirmed = true;
+                await _dbContext.SaveChangesAsync();
+                
+                viewModel.Accepted = true;
+            }
+
+            return View(viewModel);
+        }
+
         /// <summary>
         /// Show logout page
         /// </summary>
@@ -178,7 +370,7 @@ namespace IdentityServerHost.Quickstart.UI
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
                 // delete local authentication cookie
                 await _signInManager.SignOutAsync();
@@ -212,6 +404,16 @@ namespace IdentityServerHost.Quickstart.UI
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
+        private LoginAttemptConfirmViewModel BuildLoginAttemptConfirmViewModel(LoginAttempt loginAttempt)
+        {
+            return new LoginAttemptConfirmViewModel
+            {
+                Id = loginAttempt?.Id,
+                ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow,
+                WasAlreadyConfirmed = loginAttempt?.Accepted ?? false
+            };
+        }
+
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
@@ -224,7 +426,7 @@ namespace IdentityServerHost.Quickstart.UI
                 {
                     EnableLocalLogin = local,
                     ReturnUrl = returnUrl,
-                    Username = context?.LoginHint,
+                    Email = context.LoginHint,
                 };
 
                 if (!local)
@@ -265,7 +467,7 @@ namespace IdentityServerHost.Quickstart.UI
                 AllowRememberLogin = AccountOptions.AllowRememberLogin,
                 EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
                 ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
+                Email = context?.LoginHint,
                 ExternalProviders = providers.ToArray()
             };
         }
@@ -273,7 +475,7 @@ namespace IdentityServerHost.Quickstart.UI
         private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
         {
             var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
-            vm.Username = model.Username;
+            vm.Email = model.Email;
             vm.RememberLogin = model.RememberLogin;
             return vm;
         }
@@ -282,7 +484,7 @@ namespace IdentityServerHost.Quickstart.UI
         {
             var vm = new LogoutViewModel { LogoutId = logoutId, ShowLogoutPrompt = AccountOptions.ShowLogoutPrompt };
 
-            if (User?.Identity.IsAuthenticated != true)
+            if (User?.Identity?.IsAuthenticated != true)
             {
                 // if the user is not authenticated, then just show logged out page
                 vm.ShowLogoutPrompt = false;
@@ -311,12 +513,12 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
                 PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
-                ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
+                ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout.ClientName,
                 SignOutIframeUrl = logout?.SignOutIFrameUrl,
                 LogoutId = logoutId
             };
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
                 var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
                 if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)

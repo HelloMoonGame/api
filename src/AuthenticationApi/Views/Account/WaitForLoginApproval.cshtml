@@ -1,0 +1,20 @@
+﻿@using System.Globalization
+@model LoginAttemptViewModel
+
+<div class="login-page">
+    <div class="lead">
+        <h1>Login</h1>
+        <p>An email has been send to you to approve this login attempt. Please keep this browser tab open and return after clicking the link in the email.</p>
+        <p>Time left to approve: <span id="timeLeft">...</span></p>
+
+        <input type="hidden" id="loginAttemptId" value="@Model.Id" />
+        <input type="hidden" id="returnUrl" value="@Model.ReturnUrl" />
+        <input type="hidden" id="rememberLogin" value="@Model.RememberLogin" />
+        <input type="hidden" id="expiryDate" value="@Model.ExpiryDate.ToString("G", CultureInfo.InvariantCulture) GMT" />
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="~/js/login-approval.js"></script>
+}

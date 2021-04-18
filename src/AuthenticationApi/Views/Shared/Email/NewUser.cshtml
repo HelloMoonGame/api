@@ -1,0 +1,11 @@
+﻿@model AuthenticationApi.Models.Email.NewUserEmailModel
+@{
+    Layout = "_Email";
+}
+
+<font size="2" color="#ffffff">Thank you for signing up on Hello Moon with your email address <a href="mailto:@Model.Email"><font color="#ffffff" style="text-decoration: none">@Model.Email</font></a> at Hello Moon. To start playing, please confirm your login attempt!</font>
+<br>
+<br>
+<center><a href="@Model.ConfirmUrl"><font size="2" color="#ffffff">Start playing!</font></a></center>
+<br>
+<font size="2" color="#ffffff">If you didn't try to sign up or login at Hello Moon, you can safely ignore this email. Please do not click 'Start playing' in this case, as this will give someone else access to your account.</font>

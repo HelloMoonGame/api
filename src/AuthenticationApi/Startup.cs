@@ -2,9 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using AuthenticationApi.Configuration;
 using IdentityServer4;
 using AuthenticationApi.Data;
 using AuthenticationApi.Models;
+using AuthenticationApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +45,10 @@ namespace AuthenticationApi
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.User.RequireUniqueEmail = true;
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -76,6 +81,11 @@ namespace AuthenticationApi
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
+
+            var mailConfig = Configuration.GetSection("mail").Get<MailConfig>();
+            
+            services.AddTransient(_ => mailConfig);
+            services.AddTransient<IMailService, MailService>();
         }
 
         public void Configure(IApplicationBuilder app)
