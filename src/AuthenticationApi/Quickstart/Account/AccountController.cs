@@ -309,7 +309,7 @@ namespace IdentityServerHost.Quickstart.UI
         {
             var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
             var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
-
+            
             return View(viewModel);
         }
 
@@ -331,8 +331,10 @@ namespace IdentityServerHost.Quickstart.UI
             else if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
             {
                 loginAttempt.Accepted = true;
+                var user = await _dbContext.Users.SingleAsync(u => u.Id == loginAttempt.UserId);
+                user.EmailConfirmed = true;
                 await _dbContext.SaveChangesAsync();
-
+                
                 viewModel.Accepted = true;
             }
 
