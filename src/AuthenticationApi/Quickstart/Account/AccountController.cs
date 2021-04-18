@@ -17,6 +17,7 @@ using AuthenticationApi.Data;
 using AuthenticationApi.Models.Email;
 using AuthenticationApi.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace IdentityServerHost.Quickstart.UI
 {
@@ -27,27 +28,33 @@ namespace IdentityServerHost.Quickstart.UI
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IConfiguration _configuration;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
+        private readonly IMailService _mailService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ApplicationDbContext dbContext,
+            IConfiguration configuration,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events)
+            IEventService events,
+            IMailService mailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _dbContext = dbContext;
+            _configuration = configuration;
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
+            _mailService = mailService;
         }
 
         /// <summary>
@@ -156,6 +163,15 @@ namespace IdentityServerHost.Quickstart.UI
             }
         }
 
+        private async Task<LoginAttempt> CreateLoginAttempt(string userId)
+        {
+            var loginAttempt = new LoginAttempt(userId, TimeSpan.FromMinutes(10));
+            await _dbContext.LoginAttempts.AddAsync(loginAttempt);
+            await _dbContext.SaveChangesAsync();
+
+            return loginAttempt;
+        }
+
         /// <summary>
         /// Handle postback from email login
         /// </summary>
@@ -171,53 +187,42 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 return await CancelLogin(context, model.ReturnUrl);
             }
+            
+            var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
+
+            await CancelLoginAttemptsForUserId(user.Id);
+            var loginAttempt = await CreateLoginAttempt(user.Id);
+            
             var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
-
-            if (ModelState.IsValid)
-            {
-                var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
-
-                await CancelLoginAttemptsForUserId(user.Id);
-
-                var loginAttempt = new LoginAttempt(user.Id, TimeSpan.FromMinutes(10));
-                await _dbContext.LoginAttempts.AddAsync(loginAttempt);
-                await _dbContext.SaveChangesAsync();
-
-                var mailService = new MailService();
-                    new LoginAttemptConfirmInputModel
-                    {
-                        Id = loginAttempt.Id,
-                        Secret = loginAttempt.Secret
-                    });
-
-                if (!user.EmailConfirmed)
-                {
-                    mailService.SendMail(this, model.Email, new NewUserEmailModel
-                    {
-                        ConfirmUrl = confirmUrl,
-                        Email = user.Email,
-                    });
-                }
-                else
-                {
-                    mailService.SendMail(this, model.Email, new LoginEmailModel
-                    {
-                        ConfirmUrl = confirmUrl,
-                        Email = user.Email,
-                    });
-                }
-
-                return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
+                new LoginAttemptConfirmInputModel
                 {
                     Id = loginAttempt.Id,
-                    RememberLogin = model.RememberLogin,
-                    ReturnUrl = model.ReturnUrl
+                    Secret = loginAttempt.Secret
+                });
+
+            if (!user.EmailConfirmed)
+            {
+                _mailService.SendMail(this, model.Email, new NewUserEmailModel
+                {
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
+                });
+            }
+            else
+            {
+                _mailService.SendMail(this, model.Email, new LoginEmailModel
+                {
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
                 });
             }
 
-            // something went wrong, show form with error
-            var vm = await BuildLoginViewModelAsync(model);
-            return View(vm);
+            return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
+            {
+                Id = loginAttempt.Id,
+                RememberLogin = model.RememberLogin,
+                ReturnUrl = model.ReturnUrl
+            });
         }
 
         /// <summary>
