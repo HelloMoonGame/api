@@ -1,10 +1,11 @@
-﻿@model AuthenticationApi.Models.Email.LoginEmailModel 
+﻿@model AuthenticationApi.Models.Email.LoginEmailModel
 @{
     Layout = "_Email";
 }
 
-Someone wants to login with <a href="mailto:@Model.Email"><font color="#ffffff" style="text-decoration: none">@Model.Email</font></a> at Hello Moon. Was it you?<br>
+<font size="2" color="#ffffff">Someone wants to login with <a href="mailto:@Model.Email"><font color="#ffffff" style="text-decoration: none">@Model.Email</font></a> at Hello Moon. Was it you?</font>
 <br>
-<center><a href="@Model.ConfirmUrl"><font color="#ffffff">Yes, it was me!</font></a></center><br>
 <br>
-If it wasn't you, you can safely ignore this email. Please do not click 'Yes, it was me!' if you are not trying to login at Hello Moon, as this will give someone else access to your account.
+<center><a href="@Model.ConfirmUrl"><font size="2" color="#ffffff">Yes, it was me!</font></a></center>
+<br>
+<font size="2" color="#ffffff">If it wasn't you, you can safely ignore this email. Please do not click 'Yes, it was me!' if you are not trying to login at Hello Moon, as this will give someone else access to your account.</font>
