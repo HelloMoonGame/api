@@ -79,6 +79,9 @@ stages:
         tags: |
           $(tag)
           latest
+        arguments: >-
+          --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
+          --build-arg BRANCH=$(Build.SourceBranch)
         addPipelineData: false
     - task: Docker@2
       displayName: Publish an image
