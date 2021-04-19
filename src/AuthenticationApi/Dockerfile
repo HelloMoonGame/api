@@ -24,16 +24,26 @@ ARG TARGET_BRANCH
 ARG BRANCH
 ARG PR_ID
 
-RUN dotnet sonarscanner begin \
-  /k:"$SONAR_PROJECT_KEY" \
-  /o:"$SONAR_OGRANIZAION_KEY" \
-  /d:sonar.host.url="$SONAR_HOST_URL" \
-  /d:sonar.login="$SONAR_TOKEN" \
-  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
-  /d:sonar.pullrequest.base="$TARGET_BRANCH" \
-  /d:sonar.pullrequest.branch="$BRANCH" \
-  /d:sonar.pullrequest.key="$PR_ID" \
-  /d:sonar.branch.name="$BRANCH"
+RUN if [[ -z "$PR_ID" ]] ; 
+  then \
+    dotnet sonarscanner begin \
+    /k:"$SONAR_PROJECT_KEY" \
+    /o:"$SONAR_OGRANIZAION_KEY" \
+    /d:sonar.host.url="$SONAR_HOST_URL" \
+    /d:sonar.login="$SONAR_TOKEN" \
+    /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+    /d:sonar.pullrequest.base="$TARGET_BRANCH" \
+    /d:sonar.pullrequest.branch="$BRANCH" \
+    /d:sonar.pullrequest.key="$PR_ID" \
+  ; else \
+    dotnet sonarscanner begin \
+    /k:"$SONAR_PROJECT_KEY" \
+    /o:"$SONAR_OGRANIZAION_KEY" \
+    /d:sonar.host.url="$SONAR_HOST_URL" \
+    /d:sonar.login="$SONAR_TOKEN" \
+    /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+    /d:sonar.branch.name="$BRANCH" \
+  ; fi
 
 COPY "AuthenticationApi.csproj" .
 RUN dotnet restore "AuthenticationApi.csproj"
