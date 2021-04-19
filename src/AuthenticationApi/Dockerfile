@@ -29,12 +29,12 @@ RUN dotnet sonarscanner begin \
   /o:"$SONAR_OGRANIZAION_KEY" \
   /d:sonar.host.url="$SONAR_HOST_URL" \
   /d:sonar.login="$SONAR_TOKEN" \
-  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml
-  /d:sonar.pullrequest.base=$TARGET_BRANCH
-  /d:sonar.pullrequest.branch=$BRANCH
-  /d:sonar.pullrequest.key=$PR_ID
-  /d:sonar.branch.name=$BRANCH
-  /d:sonar.branch.target=$TARGET_BRANCH
+  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+  /d:sonar.pullrequest.base="$TARGET_BRANCH" \
+  /d:sonar.pullrequest.branch="$BRANCH" \
+  /d:sonar.pullrequest.key="$PR_ID" \
+  /d:sonar.branch.name="$BRANCH" \
+  /d:sonar.branch.target="$TARGET_BRANCH"
 
 COPY "AuthenticationApi.csproj" .
 RUN dotnet restore "AuthenticationApi.csproj"
