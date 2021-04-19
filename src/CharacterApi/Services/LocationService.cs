@@ -19,8 +19,10 @@ namespace CharacterApi.Services
 
         private static readonly ConcurrentDictionary<Guid, CharacterLocation> CharacterLocations = new ();
 
-        public static IReadOnlyList<CharacterInfo> Characters =>
-            new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
+        public static IReadOnlyList<CharacterInfo> GetCharacters()
+        {
+            return new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
+        }
 
         private readonly ILogger<LocationService> _logger;
         public LocationService(ILogger<LocationService> logger)

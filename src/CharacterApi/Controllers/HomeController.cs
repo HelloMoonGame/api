@@ -1,4 +1,5 @@
-﻿using CharacterApi.Services;
+﻿using System.Text;
+using CharacterApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CharacterApi.Controllers
@@ -7,14 +8,17 @@ namespace CharacterApi.Controllers
     {
         public ActionResult Index()
         {
-            var result = "<html>" +
-                "<head><title>HelloMoon Character API</title></head>" +
-                "<body><h1>HelloMoon Character API</h1><br /><table cellspacing='10'>";
-            for (var i = 0; i < LocationService.Characters.Count; i++)
-                result += $"<tr><td>Character #{i+1}</td><td>{LocationService.Characters[i].X},{LocationService.Characters[i].Y}</tr>";
-            result += "</table></body></html>";
+            var result = new StringBuilder("<html>");
+            result.Append("<head><title>HelloMoon Character API</title></head>");
+            result.Append("<body><h1>HelloMoon Character API</h1><br /><table cellspacing='10'>");
 
-            return Content(result, "text/html");
+            var characters = LocationService.GetCharacters();
+            for (var i = 0; i < characters.Count; i++)
+                result.Append($"<tr><td>Character #{i+1}</td><td>{characters[i].X},{characters[i].Y}</tr>");
+            
+            result.Append("</table></body></html>");
+
+            return Content(result.ToString(), "text/html");
         }
     }
 }
