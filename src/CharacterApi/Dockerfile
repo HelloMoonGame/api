@@ -7,10 +7,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /
-COPY .git .
-
-RUN cd src/CharacterApi
+WORKDIR /src/CharacterApi
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
@@ -39,6 +36,10 @@ RUN if [ -z "$PR_ID" ] ; \
     /d:sonar.pullrequest.base="$TARGET_BRANCH" \
     /d:sonar.pullrequest.branch="$PR_BRANCH" \
     /d:sonar.pullrequest.key="$PR_ID" \
+    /d:sonar.pullrequest.provider=github \
+    /d:sonar.pullrequest.github.repository=HelloMoonGame/api \
+    /d:sonar.pullrequest.github.endpoint=https://github.company.com/api/v3/ \
+    /d:sonar.scm.provider=git \
   ; else \
     dotnet sonarscanner begin \
     /k:"$SONAR_PROJECT_KEY" \
@@ -47,6 +48,7 @@ RUN if [ -z "$PR_ID" ] ; \
     /d:sonar.login="$SONAR_TOKEN" \
     /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
     /d:sonar.branch.name="$BRANCH" \
+    /d:sonar.scm.provider=git \
   ; fi
 
 COPY "CharacterApi.csproj" .
