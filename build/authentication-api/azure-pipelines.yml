@@ -37,7 +37,8 @@ stages:
           $(tag)
         arguments: >-
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
-          --build-arg BRANCH=$(System.PullRequest.SourceBranch) 
+          --build-arg BRANCH=$(Build.SourceBranch) 
+          --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
           --build-arg TARGET_BRANCH=$(System.PullRequest.TargetBranch)
           --build-arg PR_ID=$(System.PullRequest.PullRequestId)
         addPipelineData: false

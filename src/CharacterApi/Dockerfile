@@ -10,7 +10,6 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src/CharacterApi
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
-
 RUN mkdir -p /usr/share/man/man1
 RUN apt-get update && apt-get install -y openjdk-11-jdk
 RUN dotnet tool install --global dotnet-sonarscanner
@@ -22,6 +21,7 @@ ARG SONAR_OGRANIZAION_KEY=hellomoon
 ARG SONAR_HOST_URL=https://sonarcloud.io
 ARG SONAR_TOKEN
 ARG TARGET_BRANCH
+ARG PR_BRANCH
 ARG BRANCH
 ARG PR_ID
 
@@ -34,7 +34,7 @@ RUN if [[ -z "$PR_ID" ]] ; \
     /d:sonar.login="$SONAR_TOKEN" \
     /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
     /d:sonar.pullrequest.base="$TARGET_BRANCH" \
-    /d:sonar.pullrequest.branch="$BRANCH" \
+    /d:sonar.pullrequest.branch="$PR_BRANCH" \
     /d:sonar.pullrequest.key="$PR_ID" \
   ; else \
     dotnet sonarscanner begin \

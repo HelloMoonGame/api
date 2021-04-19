@@ -21,6 +21,7 @@ ARG SONAR_OGRANIZAION_KEY=hellomoon
 ARG SONAR_HOST_URL=https://sonarcloud.io
 ARG SONAR_TOKEN
 ARG TARGET_BRANCH
+ARG PR_BRANCH
 ARG BRANCH
 ARG PR_ID
 
@@ -33,7 +34,7 @@ RUN if [[ -z "$PR_ID" ]] ; \
     /d:sonar.login="$SONAR_TOKEN" \
     /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
     /d:sonar.pullrequest.base="$TARGET_BRANCH" \
-    /d:sonar.pullrequest.branch="$BRANCH" \
+    /d:sonar.pullrequest.branch="$PR_BRANCH" \
     /d:sonar.pullrequest.key="$PR_ID" \
   ; else \
     dotnet sonarscanner begin \
