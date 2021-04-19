@@ -33,8 +33,7 @@ RUN dotnet sonarscanner begin \
   /d:sonar.pullrequest.base="$TARGET_BRANCH" \
   /d:sonar.pullrequest.branch="$BRANCH" \
   /d:sonar.pullrequest.key="$PR_ID" \
-  /d:sonar.branch.name="$BRANCH" \
-  /d:sonar.branch.target="$TARGET_BRANCH"
+  /d:sonar.branch.name="$BRANCH"
 
 COPY "AuthenticationApi.csproj" .
 RUN dotnet restore "AuthenticationApi.csproj"
