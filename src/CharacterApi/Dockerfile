@@ -25,7 +25,7 @@ ARG PR_BRANCH=
 ARG BRANCH=
 ARG PR_ID=
 
-RUN if [[ -z "$PR_ID" ]] ; \
+RUN if [ -z "$PR_ID" ] ; \
   then \
     dotnet sonarscanner begin \
     /k:"$SONAR_PROJECT_KEY" \
