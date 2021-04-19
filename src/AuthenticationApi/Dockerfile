@@ -16,10 +16,13 @@ RUN dotnet tool install --global dotnet-sonarscanner
 RUN dotnet tool install --global coverlet.console
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-ARG SONAR_PROJECT_KEY=HelloMoonGame_api
+ARG SONAR_PROJECT_KEY=authentication_api
 ARG SONAR_OGRANIZAION_KEY=hellomoon
 ARG SONAR_HOST_URL=https://sonarcloud.io
 ARG SONAR_TOKEN
+ARG TARGET_BRANCH
+ARG BRANCH
+ARG PR_ID
 
 RUN dotnet sonarscanner begin \
   /k:"$SONAR_PROJECT_KEY" \
@@ -27,6 +30,11 @@ RUN dotnet sonarscanner begin \
   /d:sonar.host.url="$SONAR_HOST_URL" \
   /d:sonar.login="$SONAR_TOKEN" \
   /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml
+  /d:sonar.pullrequest.base=$TARGET_BRANCH
+  /d:sonar.pullrequest.branch=$BRANCH
+  /d:sonar.pullrequest.key=$PR_ID
+  /d:sonar.branch.name=$BRANCH
+  /d:sonar.branch.target=$TARGET_BRANCH
 
 COPY "AuthenticationApi.csproj" .
 RUN dotnet restore "AuthenticationApi.csproj"
