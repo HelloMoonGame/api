@@ -39,6 +39,7 @@ RUN if [ -z "$PR_ID" ] ; \
     /d:sonar.pullrequest.provider=github \
     /d:sonar.pullrequest.github.repository=HelloMoonGame/api \
     /d:sonar.pullrequest.github.endpoint=https://github.company.com/api/v3/ \
+    /d:sonar.scm.enabled=false \
   ; else \
     dotnet sonarscanner begin \
     /k:"$SONAR_PROJECT_KEY" \
@@ -47,6 +48,7 @@ RUN if [ -z "$PR_ID" ] ; \
     /d:sonar.login="$SONAR_TOKEN" \
     /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
     /d:sonar.branch.name="$BRANCH" \
+    /d:sonar.scm.enabled=false \
   ; fi
 
 COPY "AuthenticationApi.csproj" .
