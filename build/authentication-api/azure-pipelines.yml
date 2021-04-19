@@ -37,7 +37,7 @@ stages:
           $(tag)
         arguments: >-
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
-          --build-arg BRANCH=$(Build.SourceBranch) 
+          --build-arg BRANCH=$(Build.SourceBranchName) 
           --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
           --build-arg TARGET_BRANCH=$(System.PullRequest.TargetBranch)
           --build-arg PR_ID=$(System.PullRequest.PullRequestId)
@@ -84,7 +84,7 @@ stages:
           latest
         arguments: >-
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
-          --build-arg BRANCH=$(Build.SourceBranch)
+          --build-arg BRANCH=$(Build.SourceBranchName)
         addPipelineData: false
     - task: Docker@2
       displayName: Publish an image
