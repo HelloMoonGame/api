@@ -20,12 +20,12 @@ ARG SONAR_PROJECT_KEY=character_api
 ARG SONAR_OGRANIZAION_KEY=hellomoon
 ARG SONAR_HOST_URL=https://sonarcloud.io
 ARG SONAR_TOKEN
-ARG TARGET_BRANCH
-ARG PR_BRANCH
-ARG BRANCH
-ARG PR_ID
+ARG TARGET_BRANCH=
+ARG PR_BRANCH=
+ARG BRANCH=
+ARG PR_ID=
 
-RUN if [[ -z "$PR_ID" ]] ; \
+RUN if [ -n "$PR_ID" ] ; \
   then \
     dotnet sonarscanner begin \
     /k:"$SONAR_PROJECT_KEY" \
