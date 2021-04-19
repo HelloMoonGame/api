@@ -6,15 +6,39 @@ ENV ASPNETCORE_URLS "http://+:80;https://+:443"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
+ARG SONAR_PROJECT_KEY=HelloMoonGame_api
+ARG SONAR_OGRANIZAION_KEY=hellomoon
+ARG SONAR_HOST_URL=https://sonarcloud.io
+ARG SONAR_TOKEN
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src/AuthenticationApi
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
+
+RUN apt-get update && apt-get install -y openjdk-11-jdk
+RUN dotnet tool install --global dotnet-sonarscanner
+RUN dotnet tool install --global coverlet.console
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+RUN dotnet sonarscanner begin \
+  /k:"$SONAR_PROJECT_KEY" \
+  /o:"$SONAR_OGRANIZAION_KEY" \
+  /d:sonar.host.url="$SONAR_HOST_URL" \
+  /d:sonar.login="$SONAR_TOKEN" \
+  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml
 
 COPY "AuthenticationApi.csproj" .
 RUN dotnet restore "AuthenticationApi.csproj"
 
 COPY . .
 RUN dotnet build "AuthenticationApi.csproj" -c Release -o /app/build
+
+RUN dotnet test \
+  /p:CollectCoverage=true \
+  /p:CoverletOutputFormat=opencover \
+  /p:CoverletOutput="/coverage"
+
+RUN dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
 
 FROM build AS publish
 RUN dotnet publish "AuthenticationApi.csproj" -c Release -o /app/publish
