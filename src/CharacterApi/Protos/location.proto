@@ -2,8 +2,6 @@ syntax = "proto3";
 
 option csharp_namespace = "CharacterApi";
 
-package characterApi;
-
 service Location {
   rpc Subscribe (Empty) returns (stream LocationUpdateResponse);
 }
