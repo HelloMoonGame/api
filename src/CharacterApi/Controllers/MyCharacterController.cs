@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using CharacterApi.Application.Characters;
 using CharacterApi.Application.Characters.CreateCharacter;
 using CharacterApi.Application.Characters.GetUserCharacter;
+using CharacterApi.Domain.Characters.Rules;
+using CharacterApi.Domain.SeedWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,15 +58,20 @@ namespace CharacterApi.Controllers
         [ProducesResponseType(typeof(CharacterDto), (int)HttpStatusCode.Conflict)]
         public async Task<IActionResult> CreateCharacter([FromBody] CreateCharacterRequest request)
         {
+            var userId = Guid.Parse(User?.Identity?.Name ?? "");
+            
             try
             {
-                var character = await _mediator.Send(new CreateCharacterCommand(Guid.Parse(User?.Identity?.Name ?? ""),
+                var character = await _mediator.Send(new CreateCharacterCommand(userId,
                     request.FirstName, request.LastName, request.Sex));
                 return Created(string.Empty, character);
             }
-            catch //todo: catch correct custom error and return existing character
+            catch(BusinessRuleValidationException e)
             {
-                return Conflict("Error creating a new character, maybe because this user already has a character?");
+                if (e.BrokenRule.GetType() == typeof(UserCanOnlyHaveOneCharacter))
+                    return Conflict(await _mediator.Send(new GetUserCharacterQuery(userId)));
+
+                throw;
             }
         }
     }
