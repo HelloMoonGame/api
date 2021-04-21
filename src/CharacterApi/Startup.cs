@@ -1,7 +1,19 @@
-﻿using CharacterApi.Services;
+﻿using System.Security.Claims;
+using System.Text.Json.Serialization;
+using CharacterApi.Application.Characters.DomainServices;
+using CharacterApi.Configuration;
+using CharacterApi.Domain.Characters;
+using CharacterApi.Domain.SeedWork;
+using CharacterApi.Infrastructure.Database;
+using CharacterApi.Infrastructure.Domain;
+using CharacterApi.Infrastructure.Domain.Characters;
+using CharacterApi.Infrastructure.Processing;
+using CharacterApi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,8 +33,20 @@ namespace CharacterApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddDbContext<CharactersContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<ISingleCharacterPerUserChecker, SingleCharacterPerUserChecker>();
+            services.AddTransient<ICharacterRepository, CharacterRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+            services.AddMediatR(typeof(Startup));
+            services.AddMvc().AddJsonOptions(opts =>
+            {
+                opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             services.AddGrpc();
+            services.AddSwaggerDocumentation();
 
             services.AddCors(o =>
             {
@@ -58,6 +82,7 @@ namespace CharacterApi
                 {
                     options.Authority = Configuration["AuthenticationApiUrl"];
                     options.TokenValidationParameters.ValidateAudience = false;
+                    options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
         }
 
@@ -85,6 +110,8 @@ namespace CharacterApi
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+            
+            app.UseSwaggerDocumentation();
         }
     }
 }
