@@ -14,7 +14,7 @@ namespace CharacterApi.Application.Characters.GetUserCharacter
             _characterRepository = characterRepository;
         }
 
-        public async Task<CharacterDto> Handle(GetUserCharacterQuery request, CancellationToken cancellationToken = default)
+        public async Task<CharacterDto> Handle(GetUserCharacterQuery request, CancellationToken cancellationToken)
         {
             var character = await _characterRepository.GetByUserIdAsync(request.UserId, cancellationToken);
             return character == null ? null : CharacterDto.FromCharacter(character);

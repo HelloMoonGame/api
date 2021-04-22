@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace CharacterApi.Domain.SeedWork
 {
+    [Serializable]
     public class BusinessRuleValidationException : Exception
     {
         public IBusinessRule BrokenRule { get; }
@@ -12,6 +14,17 @@ namespace CharacterApi.Domain.SeedWork
         {
             BrokenRule = brokenRule;
             Details = brokenRule.Message;
+        }
+
+        protected BusinessRuleValidationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            Details = info.GetString(nameof(Details));
+        }
+        
+        public override void GetObjectData(
+            SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(Details), Details);
         }
 
         public override string ToString()
