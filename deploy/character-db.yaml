@@ -1,22 +1,11 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: hellomoon
-  name: authentication-db-config
-  labels:
-    app: authentication-db
-data:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: this_is_a_public_password
----
 kind: PersistentVolume
 apiVersion: v1
 metadata:
   namespace: hellomoon
-  name: authentication-db-volume
+  name: character-db-volume
   labels:
     type: local
-    app: authentication-db
+    app: character-db
 spec:
   storageClassName: manual
   capacity:
@@ -24,15 +13,15 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/mnt/data/authentication-db"
+    path: "/mnt/data/character-db"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   namespace: hellomoon
-  name: authentication-db-volume-claim
+  name: character-db-volume-claim
   labels:
-    app: authentication-db
+    app: character-db
 spec:
   storageClassName: manual
   accessModes:
@@ -45,7 +34,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: hellomoon
-  name: authentication-db
+  name: character-db
 
 spec:
   ports:
@@ -53,36 +42,44 @@ spec:
       name: postgresql
       port: 5432
   selector:
-    app: authentication-db
+    app: character-db
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: hellomoon
-  name: authentication-db
+  name: character-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: authentication-db
+      app: character-db
   template:
     metadata:
       labels:
-        app: authentication-db
+        app: character-db
     spec:
       containers:
-        - name: authentication-db
+        - name: character-db
           image: postgres
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 5432
           envFrom:
-            - configMapRef:
-                name: authentication-db-config
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: characterdb-secrets
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: characterdb-secrets
+                  key: password
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgredb
       volumes:
         - name: postgredb
           persistentVolumeClaim:
-            claimName: authentication-db-volume-claim
+            claimName: character-db-volume-claim
