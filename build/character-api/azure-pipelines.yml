@@ -34,13 +34,36 @@ stages:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
         tags: |
-          $(tag)
+          cache-build
         arguments: >-
+          --target build
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
           --build-arg BRANCH=$(Build.SourceBranchName) 
           --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
           --build-arg TARGET_BRANCH=$(System.PullRequest.TargetBranch)
           --build-arg PR_ID=$(System.PullRequest.PullRequestNumber)
+        addPipelineData: false
+    - task: Docker@2
+      displayName: Build an image (publish)
+      inputs:
+        repository: 'hellomoon/character-api'
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        tags: |
+          cache-publish
+        arguments: >-
+          --target publish
+    - task: Docker@2
+      displayName: Build an image (final)
+      inputs:
+        repository: 'hellomoon/character-api'
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        tags: |
+          $(tag)
+          cache-final
+        arguments: >-
+          --target final
         addPipelineData: false
     - task: Docker@2
       displayName: Publish an image
