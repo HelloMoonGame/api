@@ -63,6 +63,11 @@ stages:
           cache-publish
         arguments: >-
           --target publish
+          --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
+          --build-arg BRANCH=$(Build.SourceBranchName) 
+          --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
+          --build-arg TARGET_BRANCH=$(System.PullRequest.TargetBranch)
+          --build-arg PR_ID=$(System.PullRequest.PullRequestNumber)
     - task: Docker@2
       displayName: Build an image (final)
       inputs:
@@ -74,6 +79,11 @@ stages:
           cache-final
         arguments: >-
           --target final
+          --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
+          --build-arg BRANCH=$(Build.SourceBranchName) 
+          --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
+          --build-arg TARGET_BRANCH=$(System.PullRequest.TargetBranch)
+          --build-arg PR_ID=$(System.PullRequest.PullRequestNumber)
         addPipelineData: false
     - script: |
         mkdir -p $(Pipeline.Workspace)/docker
