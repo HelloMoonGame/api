@@ -76,7 +76,6 @@ stages:
         dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
         tags: |
           $(tag)
-          cache-final
         arguments: >-
           --target final
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
