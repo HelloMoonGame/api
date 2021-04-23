@@ -64,6 +64,18 @@ spec:
             - name: https
               containerPort: 443
           env:
+            - name: DatabaseUsername
+              valueFrom:
+                secretKeyRef:
+                  name: characterdb-secrets
+                  key: username
+            - name: DatabasePassword
+              valueFrom:
+                secretKeyRef:
+                  name: characterdb-secrets
+                  key: password
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=character-db;Username=${DatabaseUsername};Password=${DatabasePassword};Database=characterdb"
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
 

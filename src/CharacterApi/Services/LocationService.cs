@@ -21,7 +21,8 @@ namespace CharacterApi.Services
 
         public static IReadOnlyList<CharacterInfo> GetCharacters()
         {
-            return new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
+            lock(CharacterLocations)
+                return new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
         }
 
         private readonly ILogger<LocationService> _logger;
@@ -77,13 +78,16 @@ namespace CharacterApi.Services
         {
             if (newLocation != null)
             {
-                CharacterLocations.AddOrUpdate(characterGuid, newLocation, (guid, oldLocation) => newLocation);
+                lock(CharacterLocations)
+                    CharacterLocations.AddOrUpdate(characterGuid, newLocation, (_, _) => newLocation);
+                
                 _logger.LogInformation($"Character {characterGuid} is now at location {newLocation.X},{newLocation.Y}");
             }
             else
             {
-                if (!CharacterLocations.TryRemove(characterGuid, out _))
-                    _logger.LogWarning($"Could not remove character {characterGuid} from location list");
+                lock(CharacterLocations)
+                    if (!CharacterLocations.TryRemove(characterGuid, out _))
+                        _logger.LogWarning($"Could not remove character {characterGuid} from location list");
             }
 
             var message = new LocationUpdateResponse
