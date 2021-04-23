@@ -63,7 +63,7 @@ stages:
         addPipelineData: false
     - script: |
         mkdir -p $(Pipeline.Workspace)/docker
-        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:$(tag) mcr.microsoft.com/dotnet/aspnet:5.0-alpine mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
+        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:$(tag)
       displayName: Save Docker image
       condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))
     - task: CopyFiles@2
@@ -123,7 +123,7 @@ stages:
         addPipelineData: false
     - script: |
         mkdir -p $(Pipeline.Workspace)/docker
-        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:$(tag) mcr.microsoft.com/dotnet/aspnet:5.0-alpine mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
+        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:$(tag)
       displayName: Save Docker image
       condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))
     - task: CopyFiles@2
