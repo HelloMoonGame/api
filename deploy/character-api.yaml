@@ -75,7 +75,7 @@ spec:
                   name: characterdb-secrets
                   key: password
             - name: ConnectionStrings__DefaultConnection
-              value: "Host=character-db;Username=${DatabaseUsername};Password=${DatabasePassword};Database=characterdb"
+              value: "Host=character-db;Username=%DatabaseUsername%;Password=%DatabasePassword%;Database=characterdb"
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
 

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using CharacterApi.Application.Characters.DomainServices;
 using CharacterApi.Configuration;
@@ -34,7 +35,7 @@ namespace CharacterApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<CharactersContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
 
             services.AddTransient<ISingleCharacterPerUserChecker, SingleCharacterPerUserChecker>();
             services.AddTransient<ICharacterRepository, CharacterRepository>();
