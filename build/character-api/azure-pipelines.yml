@@ -47,6 +47,7 @@ stages:
           cache-build
         arguments: >-
           --target build
+          --cache-from hellomoon/character-api:cache-build
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
           --build-arg BRANCH=$(Build.SourceBranchName) 
           --build-arg PR_BRANCH=$(System.PullRequest.SourceBranch)
