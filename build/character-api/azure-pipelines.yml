@@ -89,7 +89,6 @@ stages:
         mkdir -p $(Pipeline.Workspace)/docker
         docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:cache-build mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
       displayName: Save Docker image
-      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_HIT, 'true')))
     - task: Docker@2
       displayName: Publish an image
       inputs:
