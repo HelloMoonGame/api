@@ -87,7 +87,7 @@ stages:
         addPipelineData: false
     - script: |
         mkdir -p $(Pipeline.Workspace)/docker
-        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:cache-build mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
+        docker save -o $(Pipeline.Workspace)/docker/cache.tar hellomoon/character-api:cache-build
       displayName: Save Docker image
     - task: Docker@2
       displayName: Publish an image
