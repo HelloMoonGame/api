@@ -8,12 +8,12 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src/CharacterApi
-RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
 RUN apt-get update && apt-get install -y openjdk-11-jdk
 RUN dotnet tool install --global dotnet-sonarscanner
 RUN dotnet tool install --global coverlet.console
+RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 ARG SONAR_PROJECT_KEY=character_api

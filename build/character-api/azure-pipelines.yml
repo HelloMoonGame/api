@@ -110,6 +110,8 @@ stages:
         arguments: >-
           --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
           --build-arg BRANCH=$(Build.SourceBranchName)
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          -–cache-from hellomoon/character-api
         addPipelineData: false
     - task: Docker@2
       displayName: Publish an image
