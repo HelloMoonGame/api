@@ -30,7 +30,7 @@ namespace CharacterApi.Application.Characters.CreateCharacter
 
             await _unitOfWork.CommitAsync(cancellationToken);
 
-            return new CharacterDto { Id = character.Id };
+            return CharacterDto.FromCharacter(character);
         }
     }
 }
