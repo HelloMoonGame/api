@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Models;
+using CharacterApi.Application.CharacterLocations;
+using CharacterApi.Application.CharacterLocations.GetCharacterLocation;
+using CharacterApi.Application.CharacterLocations.GetCharacterLocations;
+using CharacterApi.Application.CharacterLocations.SpawnCharacter;
+using CharacterApi.Application.Characters.GetUserCharacter;
 using Grpc.Core;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
@@ -15,119 +20,115 @@ namespace CharacterApi.GrpcServices
     [Authorize]
     public class LocationService : Location.LocationBase
     {
-        private static readonly ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>> Subscriptions = new ();
-
-        private static readonly ConcurrentDictionary<Guid, CharacterLocation> CharacterLocations = new ();
-
-        public static IReadOnlyList<CharacterInfo> GetCharacters()
-        {
-            lock(CharacterLocations)
-                return new ReadOnlyCollection<CharacterInfo>(CharacterLocations.Select(x => new CharacterInfo(x.Key, x.Value.X, x.Value.Y)).ToList());
-        }
+        private static readonly ConcurrentDictionary<Guid, IList<IServerStreamWriter<LocationUpdateResponse>>> Subscriptions = new();
 
         private readonly ILogger<LocationService> _logger;
-        public LocationService(ILogger<LocationService> logger)
+        private readonly IMediator _mediator;
+
+        public LocationService(ILogger<LocationService> logger, IMediator mediator)
         {
             _logger = logger;
+            _mediator = mediator;
         }
 
-        private void AddSubscription(Guid characterGuid, IServerStreamWriter<LocationUpdateResponse> responseStream)
+        private void AddSubscription(Guid characterId, IServerStreamWriter<LocationUpdateResponse> responseStream)
         {
             lock (Subscriptions)
             {
-                if (Subscriptions.TryGetValue(characterGuid, out var subscriptions))
+                if (Subscriptions.TryGetValue(characterId, out var subscriptions))
                 {
                     subscriptions.Add(responseStream);
-                    _logger.LogInformation($"New connection for character: {characterGuid}");
+                    _logger.LogInformation($"New connection for character: {characterId}");
                 }
                 else
                 {
-                    Subscriptions.TryAdd(characterGuid, new List<IServerStreamWriter<LocationUpdateResponse>> { responseStream });
-                    _logger.LogInformation($"New character online: {characterGuid}");
-                    UpdateCharacterLocation(characterGuid, GenerateCharacterLocation());
+                    Subscriptions.TryAdd(characterId,
+                        new List<IServerStreamWriter<LocationUpdateResponse>> { responseStream });
+                    _logger.LogInformation($"New character online: {characterId}");
                 }
             }
         }
 
-        private static CharacterLocation GenerateCharacterLocation()
-        {
-            var random = new Random(DateTime.UtcNow.Millisecond);
-            return new CharacterLocation(random.Next(-2, 2), random.Next(-2, 2));
-        }
-
-        private void RemoveSubscription(Guid characterGuid, IServerStreamWriter<LocationUpdateResponse> responseStream)
+        private void RemoveSubscription(Guid characterId, IServerStreamWriter<LocationUpdateResponse> responseStream, CancellationToken cancellationToken)
         {
             lock (Subscriptions)
             {
-                if (Subscriptions.TryGetValue(characterGuid, out var subscriptions))
+                if (Subscriptions.TryGetValue(characterId, out var subscriptions))
                 {
                     subscriptions.Remove(responseStream);
                     if (subscriptions.Count == 0)
                     {
-                        _logger.LogInformation($"Character {characterGuid} is disconnected and will be removed from subscription list");
-                        if (!Subscriptions.TryRemove(characterGuid, out _))
-                            _logger.LogWarning($"Could not remove character {characterGuid} from subscription list");
-                        
-                        UpdateCharacterLocation(characterGuid, null);
+                        _logger.LogInformation($"Character {characterId} is disconnected and will be removed from subscription list");
+                        if (!Subscriptions.TryRemove(characterId, out _))
+                            _logger.LogWarning($"Could not remove character {characterId} from subscription list");
+
+                        PublishCharacterLocation(characterId, null, cancellationToken);
                     }
                 }
             }
         }
 
-        private void UpdateCharacterLocation(Guid characterGuid, CharacterLocation newLocation)
+        public static void PublishCharacterLocation(Guid characterId, CharacterLocationDto location, CancellationToken cancellationToken)
         {
-            if (newLocation != null)
-            {
-                lock(CharacterLocations)
-                    CharacterLocations.AddOrUpdate(characterGuid, newLocation, (_, _) => newLocation);
-                
-                _logger.LogInformation($"Character {characterGuid} is now at location {newLocation.X},{newLocation.Y}");
-            }
-            else
-            {
-                lock(CharacterLocations)
-                    if (!CharacterLocations.TryRemove(characterGuid, out _))
-                        _logger.LogWarning($"Could not remove character {characterGuid} from location list");
-            }
-
             var message = new LocationUpdateResponse
             {
                 LocationUpdates =
                 {
                     new LocationUpdate {
-                        CharacterId = characterGuid.ToString(),
-                        Online = newLocation != null,
-                        X = newLocation?.X ?? 0,
-                        Y = newLocation?.Y ?? 0
+                        CharacterId = characterId.ToString(),
+                        Online = location != null,
+                        X = location?.X ?? 0,
+                        Y = location?.Y ?? 0
                     }
                 }
             };
 
-            Task.WaitAll(Subscriptions.Values
-                .SelectMany(x => x)
-                .Select(s => s.WriteAsync(message))
-                .ToArray());
+            lock (Subscriptions)
+                Task.WaitAll(Subscriptions.Values
+                    .SelectMany(x => x)
+                    .Select(s => s.WriteAsync(message))
+                    .ToArray(), cancellationToken);
         }
 
         public override async Task Subscribe(Empty request, IServerStreamWriter<LocationUpdateResponse> responseStream, ServerCallContext context)
         {
-            var user = context.GetHttpContext().User;
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userGuid = Guid.Parse(userId);
+            var userId = GetUserId(context);
 
-            AddSubscription(userGuid, responseStream);
+            var character = await _mediator.Send(new GetUserCharacterQuery(userId), context.CancellationToken);
+            if (character == null)
+                return;
+            
+            var characterLocation = await _mediator.Send(new GetCharacterLocationQuery(character.Id), context.CancellationToken) ??
+                                    await _mediator.Send(new SpawnCharacterCommand(character.Id), context.CancellationToken);
 
+            PublishCharacterLocation(characterLocation.CharacterId, characterLocation, context.CancellationToken);
+            
+            AddSubscription(character.Id, responseStream);
+            
             var message = new LocationUpdateResponse();
-            lock (CharacterLocations)
+            if (Subscriptions != null)
             {
-                message.LocationUpdates.AddRange(CharacterLocations.Select(c => new LocationUpdate
+                List<Guid> onlineCharacterIds;
+                lock (Subscriptions)
                 {
-                    CharacterId = c.Key.ToString(),
-                    Online = true,
-                    X = c.Value.X,
-                    Y = c.Value.Y
-                }));
+                    onlineCharacterIds = Subscriptions.Keys.ToList();
+                }
+
+                var onlineCharacters = await _mediator.Send(
+                        new GetCharacterLocationsQuery(onlineCharacterIds),
+                        context.CancellationToken
+                    );
+
+                message.LocationUpdates.AddRange(onlineCharacters
+                    .Select(c => new LocationUpdate
+                    {
+                        CharacterId = c.CharacterId.ToString(),
+                        Online = true,
+                        X = c.X,
+                        Y = c.Y
+                    }));
             }
+
             await responseStream.WriteAsync(message);
 
             try
@@ -136,8 +137,16 @@ namespace CharacterApi.GrpcServices
             }
             catch (TaskCanceledException)
             {
-                RemoveSubscription(userGuid, responseStream);
+                RemoveSubscription(character.Id, responseStream, CancellationToken.None);
             }
+        }
+
+        private static Guid GetUserId(ServerCallContext context)
+        {
+            var user = context.GetHttpContext().User;
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userGuid = Guid.Parse(userId);
+            return userGuid;
         }
     }
 }
