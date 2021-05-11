@@ -9,7 +9,7 @@ using CharacterApi.Infrastructure.Database;
 using CharacterApi.Infrastructure.Domain;
 using CharacterApi.Infrastructure.Domain.Characters;
 using CharacterApi.Infrastructure.Processing;
-using CharacterApi.Services;
+using CharacterApi.GrpcServices;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;

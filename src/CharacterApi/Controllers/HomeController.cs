@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using CharacterApi.Services;
+using CharacterApi.GrpcServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CharacterApi.Controllers

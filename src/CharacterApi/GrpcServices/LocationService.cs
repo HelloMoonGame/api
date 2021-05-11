@@ -10,7 +10,7 @@ using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
-namespace CharacterApi.Services
+namespace CharacterApi.GrpcServices
 {
     [Authorize]
     public class LocationService : Location.LocationBase
