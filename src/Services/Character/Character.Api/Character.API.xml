@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>CharacterApi</name>
+        <name>Character.Api</name>
     </assembly>
     <members>
         <member name="T:CharacterApi.Application.CharacterLocations.CharacterLocationDto">
