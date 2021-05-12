@@ -62,7 +62,7 @@ RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SON
 
 FROM build AS publish
 RUN dotnet publish "Character.Api.csproj" -c Release -o /app/publish
-COPY --from=build /src/Services/CharacterCharacterApi/localhost.pfx /app/publish/
+COPY --from=build /src/Services/Character/Character.Api/localhost.pfx /app/publish/
 
 FROM base AS final
 WORKDIR /app
