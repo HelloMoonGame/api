@@ -56,7 +56,7 @@ RUN dotnet build Services/Authentication/Authentication.Api/Authentication.Api.c
 RUN dotnet test \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=\"json,opencover\" \
-  /p:CoverletOutput="/coverage" \
+  /p:CoverletOutput="/coverage/" \
   /p:MergeWith="/coverage/coverage.json"
   
 RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi

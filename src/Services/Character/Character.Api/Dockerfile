@@ -56,7 +56,7 @@ RUN dotnet build Services/Character/Character.Api/Character.Api.csproj -c Releas
 RUN dotnet test Services/Character/Character.UnitTests/Character.UnitTests.csproj \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=\"json,opencover\" \
-  /p:CoverletOutput="/coverage" \
+  /p:CoverletOutput="/coverage/" \
   /p:MergeWith="/coverage/coverage.json"
   
 RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi
