@@ -43,7 +43,7 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ; \
   /o:"$SONAR_OGRANIZAION_KEY" \
   /d:sonar.host.url="$SONAR_HOST_URL" \
   /d:sonar.login="$SONAR_TOKEN" \
-  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+  /d:sonar.cs.opencover.reportsPaths=/coverage/coverage.opencover.xml \
   /d:sonar.branch.name="$BRANCH" \
   ; fi
 
