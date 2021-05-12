@@ -32,7 +32,7 @@ stages:
       inputs:
         repository: 'hellomoon/authentication-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/AuthenticationApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
         tags: |
           $(tag)
         arguments: >-
@@ -78,7 +78,7 @@ stages:
       inputs:
         repository: 'hellomoon/authentication-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/AuthenticationApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
         tags: |
           $(tag)
           latest

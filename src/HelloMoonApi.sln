@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterApi", "Services\Character\CharacterApi\CharacterApi.csproj", "{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterApi", "Services\Character\Character.Api\Character.Api.csproj", "{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationApi", "Services\Authentication\AuthenticationApi\AuthenticationApi.csproj", "{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationApi", "Services\Authentication\Authentication.Api\Authentication.Api.csproj", "{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{AD7677BA-88F3-4297-B869-C48C63A338EE}"
 EndProject

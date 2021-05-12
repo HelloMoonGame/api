@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CharacterApi</name>
+    </assembly>
+    <members>
+        <member name="T:CharacterApi.Application.CharacterLocations.CharacterLocationDto">
+            <summary>
+            Location information for a character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.CharacterId">
+            <summary>
+            Unique identifier of the character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.X">
+            <summary>
+            X-coordinate of the character on the map
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.Y">
+            <summary>
+            y-coordinate of the character on the map
+            </summary>
+        </member>
+        <member name="T:CharacterApi.Application.Characters.CharacterDto">
+            <summary>
+            Character that is controlled by the user
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CharacterDto.Id">
+            <summary>
+            Unique identifier of the character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CharacterDto.FirstName">
+            <summary>
+            First name of the character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CharacterDto.LastName">
+            <summary>
+            Last name of the character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CharacterDto.Sex">
+            <summary>
+            Sex describes the biological attributes of the character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.FirstName">
+            <summary>
+            First Name of the new character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.LastName">
+            <summary>
+            Last Name of the new character
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.Sex">
+            <summary>
+            Sex describes the biological attributes of the new character
+            </summary>
+        </member>
+        <member name="T:CharacterApi.Controllers.MyCharacterController">
+            <summary>
+            Manage the character a user is playing with.
+            A user can only have one active character.
+            </summary>
+        </member>
+        <member name="M:CharacterApi.Controllers.MyCharacterController.GetMyCharacter">
+            <summary>
+            Get the details of the character a user is playing with.
+            </summary>
+            <response code="200">Current user's character</response>
+            <response code="404">If the user does not have a character</response>    
+        </member>
+        <member name="M:CharacterApi.Controllers.MyCharacterController.CreateCharacter(CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest)">
+            <summary>
+            Create a new character if the user currently doesn't have one.
+            </summary>
+            <param name="request">Character details</param>
+            <returns>Created character</returns>
+        </member>
+        <member name="T:CharacterApi.Domain.Characters.SexType">
+            <summary>
+            Sex describes the biological attributes of the character
+            </summary>
+        </member>
+        <member name="T:CharacterApi.Domain.SeedWork.Entity">
+            <summary>
+            Base class for entities.
+            </summary>
+        </member>
+        <member name="P:CharacterApi.Domain.SeedWork.Entity.DomainEvents">
+            <summary>
+            Domain events occurred.
+            </summary>
+        </member>
+        <member name="M:CharacterApi.Domain.SeedWork.Entity.AddDomainEvent(CharacterApi.Domain.SeedWork.IDomainEvent)">
+            <summary>
+            Add domain event.
+            </summary>
+            <param name="domainEvent"></param>
+        </member>
+        <member name="M:CharacterApi.Domain.SeedWork.Entity.ClearDomainEvents">
+            <summary>
+            Clear domain events.
+            </summary>
+        </member>
+        <member name="T:CharacterApi.LocationReflection">
+            <summary>Holder for reflection information generated from Protos/location.proto</summary>
+        </member>
+        <member name="P:CharacterApi.LocationReflection.Descriptor">
+            <summary>File descriptor for Protos/location.proto</summary>
+        </member>
+        <member name="F:CharacterApi.LocationUpdateResponse.LocationUpdatesFieldNumber">
+            <summary>Field number for the "locationUpdates" field.</summary>
+        </member>
+        <member name="F:CharacterApi.LocationUpdate.CharacterIdFieldNumber">
+            <summary>Field number for the "characterId" field.</summary>
+        </member>
+        <member name="F:CharacterApi.LocationUpdate.OnlineFieldNumber">
+            <summary>Field number for the "online" field.</summary>
+        </member>
+        <member name="F:CharacterApi.LocationUpdate.XFieldNumber">
+            <summary>Field number for the "x" field.</summary>
+        </member>
+        <member name="F:CharacterApi.LocationUpdate.YFieldNumber">
+            <summary>Field number for the "y" field.</summary>
+        </member>
+        <member name="P:CharacterApi.Location.Descriptor">
+            <summary>Service descriptor</summary>
+        </member>
+        <member name="T:CharacterApi.Location.LocationBase">
+            <summary>Base class for server-side implementations of Location</summary>
+        </member>
+        <member name="M:CharacterApi.Location.BindService(CharacterApi.Location.LocationBase)">
+            <summary>Creates service definition that can be registered with a server</summary>
+            <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+        </member>
+        <member name="M:CharacterApi.Location.BindService(Grpc.Core.ServiceBinderBase,CharacterApi.Location.LocationBase)">
+            <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
+            Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
+            <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
+            <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+        </member>
+    </members>
+</doc>

@@ -7,7 +7,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src/Services/Authentication/AuthenticationApi
+WORKDIR /src/Services/Authentication/Authentication.Api
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
@@ -27,30 +27,30 @@ ARG PR_ID=
 
 RUN if [ -n "$PR_ID" ] ; \
   then \
-    dotnet sonarscanner begin \
-    /k:"$SONAR_PROJECT_KEY" \
-    /o:"$SONAR_OGRANIZAION_KEY" \
-    /d:sonar.host.url="$SONAR_HOST_URL" \
-    /d:sonar.login="$SONAR_TOKEN" \
-    /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
-    /d:sonar.pullrequest.base="$TARGET_BRANCH" \
-    /d:sonar.pullrequest.branch="$PR_BRANCH" \
-    /d:sonar.pullrequest.key="$PR_ID" \
+  dotnet sonarscanner begin \
+  /k:"$SONAR_PROJECT_KEY" \
+  /o:"$SONAR_OGRANIZAION_KEY" \
+  /d:sonar.host.url="$SONAR_HOST_URL" \
+  /d:sonar.login="$SONAR_TOKEN" \
+  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+  /d:sonar.pullrequest.base="$TARGET_BRANCH" \
+  /d:sonar.pullrequest.branch="$PR_BRANCH" \
+  /d:sonar.pullrequest.key="$PR_ID" \
   ; else \
-    dotnet sonarscanner begin \
-    /k:"$SONAR_PROJECT_KEY" \
-    /o:"$SONAR_OGRANIZAION_KEY" \
-    /d:sonar.host.url="$SONAR_HOST_URL" \
-    /d:sonar.login="$SONAR_TOKEN" \
-    /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
-    /d:sonar.branch.name="$BRANCH" \
+  dotnet sonarscanner begin \
+  /k:"$SONAR_PROJECT_KEY" \
+  /o:"$SONAR_OGRANIZAION_KEY" \
+  /d:sonar.host.url="$SONAR_HOST_URL" \
+  /d:sonar.login="$SONAR_TOKEN" \
+  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+  /d:sonar.branch.name="$BRANCH" \
   ; fi
 
-COPY "AuthenticationApi.csproj" .
-RUN dotnet restore "AuthenticationApi.csproj"
+COPY "Authentication.Api.csproj" .
+RUN dotnet restore "Authentication.Api.csproj"
 
 COPY . .
-RUN dotnet build "AuthenticationApi.csproj" -c Release -o /app/build
+RUN dotnet build "Authentication.Api.csproj" -c Release -o /app/build
 
 RUN dotnet test \
   /p:CollectCoverage=true \
@@ -60,10 +60,10 @@ RUN dotnet test \
 RUN dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
 
 FROM build AS publish
-RUN dotnet publish "AuthenticationApi.csproj" -c Release -o /app/publish
-COPY --from=build /src/AuthenticationApi/localhost.pfx /app/publish/
+RUN dotnet publish "Authentication.Api.csproj" -c Release -o /app/publish
+COPY --from=build /src/Services/Authentication/Authentication.Api/localhost.pfx /app/publish/
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "AuthenticationApi.dll", "/seed"]
+ENTRYPOINT ["dotnet", "Authentication.Api.dll", "/seed"]

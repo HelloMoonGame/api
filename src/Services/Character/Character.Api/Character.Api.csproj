@@ -5,7 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>7c71bdc1-cfb6-4c23-be0a-197453231edc</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DocumentationFile>CharacterAPI.xml</DocumentationFile>
+    <DocumentationFile>Character.API.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
