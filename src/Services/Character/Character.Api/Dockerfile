@@ -46,7 +46,7 @@ RUN if [ -n "$PR_ID" ] ; \
   /d:sonar.branch.name="$BRANCH" \
   ; fi
 
-COPY "CharacterApi.csproj" .
+COPY "Character.Api.csproj" .
 RUN dotnet restore "Character.Api.csproj"
 
 COPY . .
