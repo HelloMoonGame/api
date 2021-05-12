@@ -53,11 +53,11 @@ RUN dotnet restore Services/Authentication/Authentication.Api/Authentication.Api
 COPY . .
 RUN dotnet build Services/Authentication/Authentication.Api/Authentication.Api.csproj -c Release -o /app/build
 
-RUN dotnet test \
-  /p:CollectCoverage=true \
-  /p:CoverletOutputFormat=\"json,opencover\" \
-  /p:CoverletOutput="/coverage/" \
-  /p:MergeWith="/coverage/coverage.json"
+#RUN dotnet test \
+  #/p:CollectCoverage=true \
+  #/p:CoverletOutputFormat=\"json,opencover\" \
+  #/p:CoverletOutput="/coverage/" \
+  #/p:MergeWith="/coverage/coverage.json"
   
 RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi
 
