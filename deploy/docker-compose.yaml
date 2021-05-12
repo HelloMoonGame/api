@@ -11,7 +11,9 @@ services:
       POSTGRES_PASSWORD: this_is_a_public_password
 
   authentication-api:
-    build: ../src/AuthenticationApi
+    build: 
+      dockerfile: ../src/Services/Authentication/Authentication.API/Dockerfile
+      context: ../src
     restart: always
     ports:
       - 5000:443
@@ -30,7 +32,9 @@ services:
       ADMINER_PLUGINS: tables-filter tinymce
 
   character-api:
-    build: ../src/CharacterApi
+    build: 
+      dockerfile: ../src/Services/Character/Character.API/Dockerfile
+      context: ../src
     restart: always
     ports:
       - 5001:443

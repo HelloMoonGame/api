@@ -7,7 +7,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src/Services/Authentication/Authentication.Api
+WORKDIR /src
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
@@ -47,11 +47,11 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   /d:sonar.branch.name="$BRANCH" \
   ; fi
 
-COPY "Authentication.Api.csproj" .
-RUN dotnet restore "Authentication.Api.csproj"
+COPY Services/Authentication/Authentication.Api/Authentication.Api.csproj Services/Authentication/Authentication.Api/
+RUN dotnet restore Services/Authentication/Authentication.Api/Authentication.Api.csproj
 
 COPY . .
-RUN dotnet build "Authentication.Api.csproj" -c Release -o /app/build
+RUN dotnet build Services/Authentication/Authentication.Api/Authentication.Api.csproj -c Release -o /app/build
 
 RUN dotnet test \
   /p:CollectCoverage=true \
@@ -61,8 +61,8 @@ RUN dotnet test \
 RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi
 
 FROM build AS publish
-RUN dotnet publish "Authentication.Api.csproj" -c Release -o /app/publish
-COPY --from=build /src/Services/Authentication/Authentication.Api/localhost.pfx /app/publish/
+RUN dotnet publish Services/Authentication/Authentication.Api/Authentication.Api.csproj -c Release -o /app/publish
+COPY --from=build /src/localhost.pfx /app/publish/
 
 FROM base AS final
 WORKDIR /app

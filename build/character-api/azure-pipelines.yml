@@ -33,6 +33,7 @@ stages:
         repository: 'hellomoon/character-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/Services/Character/Character.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
         arguments: >-
@@ -79,6 +80,7 @@ stages:
         repository: 'hellomoon/character-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/Services/Character/Character.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
           latest

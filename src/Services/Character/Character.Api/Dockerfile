@@ -7,7 +7,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src/Services/Character/Character.Api
+WORKDIR /src
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
@@ -47,22 +47,22 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ; \
   /d:sonar.branch.name="$BRANCH" \
   ; fi
 
-COPY "Character.Api.csproj" .
-RUN dotnet restore "Character.Api.csproj"
+COPY Services/Character/Character.Api/Character.Api.csproj Services/Character/Character.Api/
+RUN dotnet restore Services/Character/Character.Api/Character.Api.csproj
 
 COPY . .
-RUN dotnet build "Character.Api.csproj" -c Release -o /app/build
+RUN dotnet build Services/Character/Character.Api/Character.Api.csproj -c Release -o /app/build
 
-RUN dotnet test \
+RUN dotnet test Services/Character/Character.UnitTests/Character.UnitTests.csproj \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=opencover \
-  /p:CoverletOutput="/coverage"
+  /p:CoverletOutput=/coverage
   
 RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi
 
 FROM build AS publish
-RUN dotnet publish "Character.Api.csproj" -c Release -o /app/publish
-COPY --from=build /src/Services/Character/Character.Api/localhost.pfx /app/publish/
+RUN dotnet publish Services/Character/Character.Api/Character.Api.csproj -c Release -o /app/publish
+COPY --from=build /src/localhost.pfx /app/publish/
 
 FROM base AS final
 WORKDIR /app

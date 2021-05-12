@@ -33,6 +33,7 @@ stages:
         repository: 'hellomoon/authentication-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
         arguments: >-
@@ -79,6 +80,7 @@ stages:
         repository: 'hellomoon/authentication-api'
         command: build
         dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
           latest
