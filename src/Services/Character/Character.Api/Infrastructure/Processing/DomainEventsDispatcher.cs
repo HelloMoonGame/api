@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.SeedWork;
-using CharacterApi.Infrastructure.Database;
+using Character.Api.Domain.SeedWork;
+using Character.Api.Infrastructure.Database;
 using MediatR;
 
-namespace CharacterApi.Infrastructure.Processing
+namespace Character.Api.Infrastructure.Processing
 {
     public class DomainEventsDispatcher : IDomainEventsDispatcher
     {

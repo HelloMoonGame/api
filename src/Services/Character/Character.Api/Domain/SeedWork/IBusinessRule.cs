@@ -1,4 +1,4 @@
-﻿namespace CharacterApi.Domain.SeedWork
+﻿namespace Character.Api.Domain.SeedWork
 {
     public interface IBusinessRule
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthenticationApi.Models
+namespace Authentication.Api.Models
 {
     public class LoginAttempt
     {

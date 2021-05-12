@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CharacterApi.Domain.CharacterLocations
+namespace Character.Api.Domain.CharacterLocations
 {
     public interface ICharacterLocationRepository
     {

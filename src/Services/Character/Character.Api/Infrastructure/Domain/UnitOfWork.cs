@@ -1,10 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.SeedWork;
-using CharacterApi.Infrastructure.Database;
-using CharacterApi.Infrastructure.Processing;
+using Character.Api.Domain.SeedWork;
+using Character.Api.Infrastructure.Database;
+using Character.Api.Infrastructure.Processing;
 
-namespace CharacterApi.Infrastructure.Domain
+namespace Character.Api.Infrastructure.Domain
 {
     public class UnitOfWork : IUnitOfWork
     {

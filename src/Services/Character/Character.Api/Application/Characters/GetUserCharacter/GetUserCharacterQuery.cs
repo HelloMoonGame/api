@@ -1,7 +1,7 @@
 ﻿using System;
 using MediatR;
 
-namespace CharacterApi.Application.Characters.GetUserCharacter
+namespace Character.Api.Application.Characters.GetUserCharacter
 {
     public class GetUserCharacterQuery : IRequest<CharacterDto>
     {

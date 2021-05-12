@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.Characters;
-using CharacterApi.Infrastructure.Database;
+using Character.Api.Domain.Characters;
+using Character.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CharacterApi.Infrastructure.Domain.Characters
+namespace Character.Api.Infrastructure.Domain.Characters
 {
     public class CharacterRepository : ICharacterRepository
     {
@@ -16,17 +16,17 @@ namespace CharacterApi.Infrastructure.Domain.Characters
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task AddAsync(Character character, CancellationToken cancellationToken = default)
+        public async Task AddAsync(Api.Domain.Characters.Character character, CancellationToken cancellationToken = default)
         {
             await _context.Characters.AddAsync(character, cancellationToken);
         }
 
-        public async Task<Character> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Api.Domain.Characters.Character> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Characters.FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public async Task<Character> GetByUserIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Api.Domain.Characters.Character> GetByUserIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Characters.SingleOrDefaultAsync(c => c.UserId == id, cancellationToken);
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CharacterApi.Domain.SeedWork
+namespace Character.Api.Domain.SeedWork
 {
     [Serializable]
     public class BusinessRuleValidationException : Exception

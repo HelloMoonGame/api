@@ -1,9 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.Characters;
+using Character.Api.Domain.Characters;
 using MediatR;
 
-namespace CharacterApi.Application.Characters.GetUserCharacter
+namespace Character.Api.Application.Characters.GetUserCharacter
 {
     public class GetUserCharacterQueryHandler : IRequestHandler<GetUserCharacterQuery, CharacterDto>
     {

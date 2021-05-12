@@ -1,9 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
+using Character.Api.Domain.CharacterLocations;
 using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.GetCharacterLocation
+namespace Character.Api.Application.CharacterLocations.GetCharacterLocation
 {
     public class GetCharacterLocationQueryHandler : IRequestHandler<GetCharacterLocationQuery, CharacterLocationDto>
     {

@@ -1,4 +1,4 @@
-﻿namespace AuthenticationApi.Models.Email
+﻿namespace Authentication.Api.Models.Email
 {
     public class LoginEmailModel : EmailModel
     {

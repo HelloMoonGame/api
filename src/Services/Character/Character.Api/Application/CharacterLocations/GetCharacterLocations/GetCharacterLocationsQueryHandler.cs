@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
+using Character.Api.Domain.CharacterLocations;
 using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.GetCharacterLocations
+namespace Character.Api.Application.CharacterLocations.GetCharacterLocations
 {
     public class GetCharacterLocationsQueryHandler : IRequestHandler<GetCharacterLocationsQuery, IEnumerable<CharacterLocationDto>>
     {

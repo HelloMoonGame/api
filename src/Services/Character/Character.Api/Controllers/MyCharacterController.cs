@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using CharacterApi.Application.Characters;
-using CharacterApi.Application.Characters.CreateCharacter;
-using CharacterApi.Application.Characters.GetUserCharacter;
-using CharacterApi.Domain.Characters.Rules;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Application.Characters;
+using Character.Api.Application.Characters.CreateCharacter;
+using Character.Api.Application.Characters.GetUserCharacter;
+using Character.Api.Domain.Characters.Rules;
+using Character.Api.Domain.SeedWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CharacterApi.Controllers
+namespace Character.Api.Controllers
 {
     /// <summary>
     /// Manage the character a user is playing with.

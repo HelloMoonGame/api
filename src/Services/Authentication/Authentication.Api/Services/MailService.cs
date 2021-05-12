@@ -1,17 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using AuthenticationApi.Configuration;
-using AuthenticationApi.Models.Email;
+using Authentication.Api.Configuration;
+using Authentication.Api.Models.Email;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using MimeKit;
 
-namespace AuthenticationApi.Services
+namespace Authentication.Api.Services
 {
     public interface IMailService
     {

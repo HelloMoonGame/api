@@ -1,7 +1,7 @@
 ﻿using System;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.CharacterLocations
+namespace Character.Api.Domain.CharacterLocations
 {
     public class CharacterMovedEvent : DomainEventBase
     {

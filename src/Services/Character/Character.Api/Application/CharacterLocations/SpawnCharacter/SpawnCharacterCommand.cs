@@ -1,7 +1,7 @@
 ﻿using System;
 using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.SpawnCharacter
+namespace Character.Api.Application.CharacterLocations.SpawnCharacter
 {
     public class SpawnCharacterCommand : IRequest<CharacterLocationDto>
     {

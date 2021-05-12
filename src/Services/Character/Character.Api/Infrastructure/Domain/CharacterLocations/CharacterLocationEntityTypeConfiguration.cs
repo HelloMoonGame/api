@@ -1,9 +1,8 @@
-﻿using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Domain.Characters;
+﻿using Character.Api.Domain.CharacterLocations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CharacterApi.Infrastructure.Domain.CharacterLocations
+namespace Character.Api.Infrastructure.Domain.CharacterLocations
 {
     internal sealed class CharacterLocationEntityTypeConfiguration : IEntityTypeConfiguration<CharacterLocation>
     {

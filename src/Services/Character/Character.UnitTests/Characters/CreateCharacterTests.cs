@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Character.Api.Application.Characters.DomainServices;
+using Character.Api.Domain.Characters;
+using Character.Api.Domain.Characters.Rules;
 using Character.UnitTests.SeedWork;
-using CharacterApi.Application.Characters.DomainServices;
-using CharacterApi.Domain.Characters;
-using CharacterApi.Domain.Characters.Rules;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -23,13 +23,13 @@ namespace Character.UnitTests.Characters
                 .Setup(r => r.GetByUserIdAsync(
                     It.Is<Guid>(id => id == userId), 
                     It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<CharacterApi.Domain.Characters.Character>(null));
+                .Returns(Task.FromResult<Api.Domain.Characters.Character>(null));
 
             var singleCharacterPerUserChecker = new SingleCharacterPerUserChecker(characterRepository.Object);
 
 
             // Act
-            var character = CharacterApi.Domain.Characters.Character.Create(
+            var character = Api.Domain.Characters.Character.Create(
                 userId, 
                 "Test", 
                 "Test", 
@@ -49,7 +49,7 @@ namespace Character.UnitTests.Characters
             var characterRepository = new Mock<ICharacterRepository>();
             var singleCharacterPerUserChecker = new SingleCharacterPerUserChecker(characterRepository.Object);
 
-            var existingCharacter = CharacterApi.Domain.Characters.Character.Create(
+            var existingCharacter = Api.Domain.Characters.Character.Create(
                 userId,
                 "Test",
                 "Test",
@@ -66,7 +66,7 @@ namespace Character.UnitTests.Characters
             AssertBrokenRule<UserCanOnlyHaveOneCharacter>(() =>
             {
                 // Act
-                CharacterApi.Domain.Characters.Character.Create(
+                Api.Domain.Characters.Character.Create(
                     userId, 
                     "Tester", 
                     "Tester", 

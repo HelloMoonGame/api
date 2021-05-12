@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace CharacterApi.Domain.SeedWork
+namespace Character.Api.Domain.SeedWork
 {
     public interface IUnitOfWork
     {

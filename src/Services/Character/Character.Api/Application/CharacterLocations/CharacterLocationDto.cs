@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
-using CharacterApi.Application.Characters;
-using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Domain.Characters;
+using Character.Api.Domain.CharacterLocations;
 
-namespace CharacterApi.Application.CharacterLocations
+namespace Character.Api.Application.CharacterLocations
 {
     /// <summary>
     /// Location information for a character

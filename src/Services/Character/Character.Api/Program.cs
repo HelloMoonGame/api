@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace CharacterApi
+namespace Character.Api
 {
     public static class Program
     {

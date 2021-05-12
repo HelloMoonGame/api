@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.GetCharacterLocations
+namespace Character.Api.Application.CharacterLocations.GetCharacterLocations
 {
     public class GetCharacterLocationsQuery : IRequest<IEnumerable<CharacterLocationDto>>
     {

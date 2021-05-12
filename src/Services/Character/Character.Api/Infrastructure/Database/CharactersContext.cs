@@ -1,12 +1,11 @@
-﻿using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Domain.Characters;
+﻿using Character.Api.Domain.CharacterLocations;
 using Microsoft.EntityFrameworkCore;
 
-namespace CharacterApi.Infrastructure.Database
+namespace Character.Api.Infrastructure.Database
 {
     public class CharactersContext : DbContext
     {
-        public DbSet<Character> Characters { get; set; }
+        public DbSet<Api.Domain.Characters.Character> Characters { get; set; }
         public DbSet<CharacterLocation> CharacterLocations { get; set; }
 
         public CharactersContext(DbContextOptions options) : base(options)

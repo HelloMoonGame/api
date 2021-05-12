@@ -1,12 +1,12 @@
 ﻿using System;
-using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Domain.SeedWork;
-using CharacterApi.Domain.SharedKernel;
+using Character.Api.Domain.CharacterLocations;
+using Character.Api.Domain.SeedWork;
+using Character.Api.Domain.SharedKernel;
+using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.SpawnCharacter
+namespace Character.Api.Application.CharacterLocations.SpawnCharacter
 {
     public class SpawnCharacterCommandHandler : IRequestHandler<SpawnCharacterCommand, CharacterLocationDto>
     {

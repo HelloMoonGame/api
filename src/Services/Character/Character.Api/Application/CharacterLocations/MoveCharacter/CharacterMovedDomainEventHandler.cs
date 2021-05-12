@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.GrpcServices;
+using Character.Api.Domain.CharacterLocations;
+using Character.Api.GrpcServices;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace CharacterApi.Application.CharacterLocations.IntegrationHandlers
+namespace Character.Api.Application.CharacterLocations.MoveCharacter
 {
     public class CharacterMovedDomainEventHandler : INotificationHandler<CharacterMovedEvent>
     {

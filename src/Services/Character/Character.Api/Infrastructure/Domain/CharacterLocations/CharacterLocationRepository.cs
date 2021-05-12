@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Infrastructure.Database;
+using Character.Api.Domain.CharacterLocations;
+using Character.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CharacterApi.Infrastructure.Domain.CharacterLocations
+namespace Character.Api.Infrastructure.Domain.CharacterLocations
 {
     public class CharacterLocationRepository : ICharacterLocationRepository
     {

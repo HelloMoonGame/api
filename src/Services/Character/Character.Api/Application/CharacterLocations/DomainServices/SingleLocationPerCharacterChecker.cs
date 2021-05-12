@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CharacterApi.Domain.CharacterLocations;
+using Character.Api.Domain.CharacterLocations;
 
-namespace CharacterApi.Application.CharacterLocations.DomainServices
+namespace Character.Api.Application.CharacterLocations.DomainServices
 {
     public class SingleLocationPerCharacterChecker : ISingleLocationPerCharacterChecker
     {

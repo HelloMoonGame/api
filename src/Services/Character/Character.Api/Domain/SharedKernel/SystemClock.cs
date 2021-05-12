@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CharacterApi.Domain.SharedKernel
+namespace Character.Api.Domain.SharedKernel
 {
     public static class SystemClock
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.CharacterLocations.Rules
+namespace Character.Api.Domain.CharacterLocations.Rules
 {
     public class CharacterCanOnlyHaveOneLocation : IBusinessRule
     {

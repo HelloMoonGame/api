@@ -1,25 +1,25 @@
-﻿using IdentityModel;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Authentication.Api.Data;
+using Authentication.Api.Models;
+using Authentication.Api.Models.Email;
+using Authentication.Api.Services;
+using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using AuthenticationApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AuthenticationApi.Data;
-using AuthenticationApi.Models.Email;
-using AuthenticationApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace IdentityServerHost.Quickstart.UI
+namespace Authentication.Api.Quickstart.Account
 {
     [SecurityHeaders]
     [AllowAnonymous]

@@ -1,8 +1,8 @@
 ﻿using System;
-using CharacterApi.Domain.Characters;
+using Character.Api.Domain.Characters;
 using MediatR;
 
-namespace CharacterApi.Application.Characters.CreateCharacter
+namespace Character.Api.Application.Characters.CreateCharacter
 {
     public class CreateCharacterCommand : IRequest<CharacterDto>
     {

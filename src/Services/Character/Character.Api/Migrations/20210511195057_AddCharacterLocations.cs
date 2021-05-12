@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace CharacterApi.Migrations
+namespace Character.Api.Migrations
 {
     public partial class AddCharacterLocations : Migration
     {

@@ -1,4 +1,4 @@
-﻿namespace AuthenticationApi.Configuration
+﻿namespace Authentication.Api.Configuration
 {
     public class MailConfig
     {

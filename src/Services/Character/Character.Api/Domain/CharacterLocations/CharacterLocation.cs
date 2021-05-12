@@ -1,8 +1,8 @@
 ﻿using System;
-using CharacterApi.Domain.CharacterLocations.Rules;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.CharacterLocations.Rules;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.CharacterLocations
+namespace Character.Api.Domain.CharacterLocations
 {
     public class CharacterLocation : Entity
     {

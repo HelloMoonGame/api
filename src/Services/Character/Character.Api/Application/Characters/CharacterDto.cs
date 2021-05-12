@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using CharacterApi.Domain.Characters;
+using Character.Api.Domain.Characters;
 
-namespace CharacterApi.Application.Characters
+namespace Character.Api.Application.Characters
 {
     /// <summary>
     /// Character that is controlled by the user
@@ -32,7 +32,7 @@ namespace CharacterApi.Application.Characters
         /// </summary>
         public SexType Sex { get; set; }
 
-        public static CharacterDto FromCharacter([NotNull] Character character)
+        public static CharacterDto FromCharacter([NotNull] Domain.Characters.Character character)
         {
             return new()
             {

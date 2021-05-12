@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CharacterApi.Domain.Characters;
+using Character.Api.Domain.Characters;
 
-namespace CharacterApi.Application.Characters.DomainServices
+namespace Character.Api.Application.Characters.DomainServices
 {
     public class SingleCharacterPerUserChecker : ISingleCharacterPerUserChecker
     {

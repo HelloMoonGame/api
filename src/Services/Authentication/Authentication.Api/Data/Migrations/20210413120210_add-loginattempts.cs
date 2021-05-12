@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace AuthenticationApi.Data.Migrations
+namespace Authentication.Api.Data.Migrations
 {
     public partial class addloginattempts : Migration
     {

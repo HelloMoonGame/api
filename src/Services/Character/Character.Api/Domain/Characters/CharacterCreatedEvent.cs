@@ -1,7 +1,7 @@
 ﻿using System;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.Characters
+namespace Character.Api.Domain.Characters
 {
     public class CharacterCreatedEvent : DomainEventBase
     {

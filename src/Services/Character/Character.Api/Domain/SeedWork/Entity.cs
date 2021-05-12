@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using CharacterApi.Domain.Characters;
 
-namespace CharacterApi.Domain.SeedWork
+namespace Character.Api.Domain.SeedWork
 {
     /// <summary>
     /// Base class for entities.

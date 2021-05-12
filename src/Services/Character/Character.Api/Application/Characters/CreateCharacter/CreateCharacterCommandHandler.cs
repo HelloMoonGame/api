@@ -1,10 +1,10 @@
-﻿using MediatR;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Domain.Characters;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.Characters;
+using Character.Api.Domain.SeedWork;
+using MediatR;
 
-namespace CharacterApi.Application.Characters.CreateCharacter
+namespace Character.Api.Application.Characters.CreateCharacter
 {
     public class CreateCharacterCommandHandler : IRequestHandler<CreateCharacterCommand, CharacterDto>
     {
@@ -24,7 +24,7 @@ namespace CharacterApi.Application.Characters.CreateCharacter
         
         public async Task<CharacterDto> Handle(CreateCharacterCommand request, CancellationToken cancellationToken)
         {
-            var character = Character.Create(request.UserId, request.FirstName, request.LastName, request.Sex, _singleCharacterPerUserChecker);
+            var character = Domain.Characters.Character.Create(request.UserId, request.FirstName, request.LastName, request.Sex, _singleCharacterPerUserChecker);
 
             await _characterRepository.AddAsync(character, cancellationToken);
 

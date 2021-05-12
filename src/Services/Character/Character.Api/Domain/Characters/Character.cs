@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using CharacterApi.Domain.Characters.Rules;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.Characters.Rules;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.Characters
+namespace Character.Api.Domain.Characters
 {
     public class Character : Entity, IAggregateRoot
     {

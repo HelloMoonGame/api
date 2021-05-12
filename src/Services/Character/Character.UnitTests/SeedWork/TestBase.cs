@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CharacterApi.Domain.SeedWork;
-using CharacterApi.Domain.SharedKernel;
+using Character.Api.Domain.SeedWork;
+using Character.Api.Domain.SharedKernel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Character.UnitTests.SeedWork

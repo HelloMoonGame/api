@@ -5,17 +5,18 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using CharacterApi.Application.CharacterLocations;
-using CharacterApi.Application.CharacterLocations.GetCharacterLocation;
-using CharacterApi.Application.CharacterLocations.GetCharacterLocations;
-using CharacterApi.Application.CharacterLocations.SpawnCharacter;
-using CharacterApi.Application.Characters.GetUserCharacter;
+using Character.Api.Application.CharacterLocations;
+using Character.Api.Application.CharacterLocations.GetCharacterLocation;
+using Character.Api.Application.CharacterLocations.GetCharacterLocations;
+using Character.Api.Application.CharacterLocations.SpawnCharacter;
+using Character.Api.Application.Characters.GetUserCharacter;
+using CharacterApi;
 using Grpc.Core;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
-namespace CharacterApi.GrpcServices
+namespace Character.Api.GrpcServices
 {
     [Authorize]
     public class LocationService : Location.LocationBase

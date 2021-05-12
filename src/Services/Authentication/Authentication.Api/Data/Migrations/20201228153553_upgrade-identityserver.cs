@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace AuthenticationApi.Data.Migrations
+namespace Authentication.Api.Data.Migrations
 {
     public partial class upgradeidentityserver : Migration
     {

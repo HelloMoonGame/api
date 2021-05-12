@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
-using CharacterApi.Application.CharacterLocations.DomainServices;
-using CharacterApi.Application.Characters.DomainServices;
-using CharacterApi.Configuration;
-using CharacterApi.Domain.CharacterLocations;
-using CharacterApi.Domain.Characters;
-using CharacterApi.Domain.SeedWork;
-using CharacterApi.Infrastructure.Database;
-using CharacterApi.Infrastructure.Domain;
-using CharacterApi.Infrastructure.Domain.Characters;
-using CharacterApi.Infrastructure.Processing;
-using CharacterApi.GrpcServices;
-using CharacterApi.Infrastructure.Domain.CharacterLocations;
+using Character.Api.Application.CharacterLocations.DomainServices;
+using Character.Api.Application.Characters.DomainServices;
+using Character.Api.Configuration;
+using Character.Api.Domain.CharacterLocations;
+using Character.Api.Domain.Characters;
+using Character.Api.Domain.SeedWork;
+using Character.Api.GrpcServices;
+using Character.Api.Infrastructure.Database;
+using Character.Api.Infrastructure.Domain;
+using Character.Api.Infrastructure.Domain.CharacterLocations;
+using Character.Api.Infrastructure.Domain.Characters;
+using Character.Api.Infrastructure.Processing;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -22,7 +22,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace CharacterApi
+namespace Character.Api
 {
     public class Startup
     {

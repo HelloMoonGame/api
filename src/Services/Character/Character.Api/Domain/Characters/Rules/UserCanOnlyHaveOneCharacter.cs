@@ -1,7 +1,7 @@
 ﻿using System;
-using CharacterApi.Domain.SeedWork;
+using Character.Api.Domain.SeedWork;
 
-namespace CharacterApi.Domain.Characters.Rules
+namespace Character.Api.Domain.Characters.Rules
 {
     public class UserCanOnlyHaveOneCharacter : IBusinessRule
     {

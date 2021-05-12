@@ -1,7 +1,7 @@
 ﻿using System;
 using MediatR;
 
-namespace CharacterApi.Application.CharacterLocations.GetCharacterLocation
+namespace Character.Api.Application.CharacterLocations.GetCharacterLocation
 {
     public class GetCharacterLocationQuery : IRequest<CharacterLocationDto>
     {

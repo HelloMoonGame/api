@@ -2,11 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using AuthenticationApi.Configuration;
-using IdentityServer4;
-using AuthenticationApi.Data;
-using AuthenticationApi.Models;
-using AuthenticationApi.Services;
+using Authentication.Api.Configuration;
+using Authentication.Api.Data;
+using Authentication.Api.Models;
+using Authentication.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace AuthenticationApi
+namespace Authentication.Api
 {
     public class Startup
     {

@@ -1,8 +1,7 @@
 ﻿using System.Text;
-using CharacterApi.GrpcServices;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CharacterApi.Controllers
+namespace Character.Api.Controllers
 {
     public class HomeController : Controller
     {

@@ -1,8 +1,6 @@
-﻿using CharacterApi.Domain.Characters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using Character.Api.Domain.Characters;
 
-namespace CharacterApi.Application.Characters.CreateCharacter
+namespace Character.Api.Application.Characters.CreateCharacter
 {
     public class CreateCharacterRequest
     {

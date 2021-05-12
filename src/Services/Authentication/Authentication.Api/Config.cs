@@ -1,7 +1,7 @@
-﻿using IdentityServer4.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using IdentityServer4.Models;
 
-namespace AuthenticationApi
+namespace Authentication.Api
 {
     public static class Config
     {

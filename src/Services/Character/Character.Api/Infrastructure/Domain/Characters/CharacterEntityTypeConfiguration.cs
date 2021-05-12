@@ -1,15 +1,14 @@
-﻿using CharacterApi.Domain.Characters;
-using CharacterApi.Infrastructure.Database;
+﻿using Character.Api.Domain.Characters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace CharacterApi.Infrastructure.Domain.Characters
+namespace Character.Api.Infrastructure.Domain.Characters
 {
 
-    internal sealed class CharacterEntityTypeConfiguration : IEntityTypeConfiguration<Character>
+    internal sealed class CharacterEntityTypeConfiguration : IEntityTypeConfiguration<Api.Domain.Characters.Character>
     {
-        public void Configure(EntityTypeBuilder<Character> builder)
+        public void Configure(EntityTypeBuilder<Api.Domain.Characters.Character> builder)
         {
             builder.ToTable("Characters");
 

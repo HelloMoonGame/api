@@ -4,108 +4,108 @@
         <name>Character.Api</name>
     </assembly>
     <members>
-        <member name="T:CharacterApi.Application.CharacterLocations.CharacterLocationDto">
+        <member name="T:Character.Api.Application.CharacterLocations.CharacterLocationDto">
             <summary>
             Location information for a character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.CharacterId">
+        <member name="P:Character.Api.Application.CharacterLocations.CharacterLocationDto.CharacterId">
             <summary>
             Unique identifier of the character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.X">
+        <member name="P:Character.Api.Application.CharacterLocations.CharacterLocationDto.X">
             <summary>
             X-coordinate of the character on the map
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.CharacterLocations.CharacterLocationDto.Y">
+        <member name="P:Character.Api.Application.CharacterLocations.CharacterLocationDto.Y">
             <summary>
             y-coordinate of the character on the map
             </summary>
         </member>
-        <member name="T:CharacterApi.Application.Characters.CharacterDto">
+        <member name="T:Character.Api.Application.Characters.CharacterDto">
             <summary>
             Character that is controlled by the user
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CharacterDto.Id">
+        <member name="P:Character.Api.Application.Characters.CharacterDto.Id">
             <summary>
             Unique identifier of the character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CharacterDto.FirstName">
+        <member name="P:Character.Api.Application.Characters.CharacterDto.FirstName">
             <summary>
             First name of the character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CharacterDto.LastName">
+        <member name="P:Character.Api.Application.Characters.CharacterDto.LastName">
             <summary>
             Last name of the character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CharacterDto.Sex">
+        <member name="P:Character.Api.Application.Characters.CharacterDto.Sex">
             <summary>
             Sex describes the biological attributes of the character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.FirstName">
+        <member name="P:Character.Api.Application.Characters.CreateCharacter.CreateCharacterRequest.FirstName">
             <summary>
             First Name of the new character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.LastName">
+        <member name="P:Character.Api.Application.Characters.CreateCharacter.CreateCharacterRequest.LastName">
             <summary>
             Last Name of the new character
             </summary>
         </member>
-        <member name="P:CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest.Sex">
+        <member name="P:Character.Api.Application.Characters.CreateCharacter.CreateCharacterRequest.Sex">
             <summary>
             Sex describes the biological attributes of the new character
             </summary>
         </member>
-        <member name="T:CharacterApi.Controllers.MyCharacterController">
+        <member name="T:Character.Api.Controllers.MyCharacterController">
             <summary>
             Manage the character a user is playing with.
             A user can only have one active character.
             </summary>
         </member>
-        <member name="M:CharacterApi.Controllers.MyCharacterController.GetMyCharacter">
+        <member name="M:Character.Api.Controllers.MyCharacterController.GetMyCharacter">
             <summary>
             Get the details of the character a user is playing with.
             </summary>
             <response code="200">Current user's character</response>
             <response code="404">If the user does not have a character</response>    
         </member>
-        <member name="M:CharacterApi.Controllers.MyCharacterController.CreateCharacter(CharacterApi.Application.Characters.CreateCharacter.CreateCharacterRequest)">
+        <member name="M:Character.Api.Controllers.MyCharacterController.CreateCharacter(Character.Api.Application.Characters.CreateCharacter.CreateCharacterRequest)">
             <summary>
             Create a new character if the user currently doesn't have one.
             </summary>
             <param name="request">Character details</param>
             <returns>Created character</returns>
         </member>
-        <member name="T:CharacterApi.Domain.Characters.SexType">
+        <member name="T:Character.Api.Domain.Characters.SexType">
             <summary>
             Sex describes the biological attributes of the character
             </summary>
         </member>
-        <member name="T:CharacterApi.Domain.SeedWork.Entity">
+        <member name="T:Character.Api.Domain.SeedWork.Entity">
             <summary>
             Base class for entities.
             </summary>
         </member>
-        <member name="P:CharacterApi.Domain.SeedWork.Entity.DomainEvents">
+        <member name="P:Character.Api.Domain.SeedWork.Entity.DomainEvents">
             <summary>
             Domain events occurred.
             </summary>
         </member>
-        <member name="M:CharacterApi.Domain.SeedWork.Entity.AddDomainEvent(CharacterApi.Domain.SeedWork.IDomainEvent)">
+        <member name="M:Character.Api.Domain.SeedWork.Entity.AddDomainEvent(Character.Api.Domain.SeedWork.IDomainEvent)">
             <summary>
             Add domain event.
             </summary>
             <param name="domainEvent"></param>
         </member>
-        <member name="M:CharacterApi.Domain.SeedWork.Entity.ClearDomainEvents">
+        <member name="M:Character.Api.Domain.SeedWork.Entity.ClearDomainEvents">
             <summary>
             Clear domain events.
             </summary>

@@ -1,4 +1,4 @@
-﻿namespace CharacterApi.Domain.Characters
+﻿namespace Character.Api.Domain.Characters
 {
     /// <summary>
     /// Sex describes the biological attributes of the character
