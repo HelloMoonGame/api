@@ -37,9 +37,7 @@ namespace Character.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CharactersContext>(options =>
-                options.UseNpgsql(Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
-
+            AddDatabase(services);
             AddDependencies(services);
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddJsonOptions(opts =>
@@ -85,6 +83,12 @@ namespace Character.Api
                     options.TokenValidationParameters.ValidateAudience = false;
                     options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
+        }
+
+        protected virtual void AddDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<CharactersContext>(options =>
+                options.UseNpgsql(Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
         }
 
         public static void AddDependencies(IServiceCollection services)

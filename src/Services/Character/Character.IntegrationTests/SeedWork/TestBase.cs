@@ -46,9 +46,9 @@ namespace Character.IntegrationTests.SeedWork
             database?.Database.Migrate();
         }
 
-        private static DbConnection CreateInMemoryDatabase()
+        public static DbConnection CreateInMemoryDatabase()
         {
-            var connection = new SqliteConnection("Filename=:memory:");
+            var connection = new SqliteConnection("Filename=:memory:;cache=shared");
 
             connection.Open();
             
