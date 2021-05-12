@@ -9,8 +9,6 @@ namespace Character.UnitTests.SeedWork
 {
     public abstract class TestBase : IDisposable
     {
-        private bool _disposed;
-
         public static T AssertPublishedDomainEvent<T>(Entity aggregate) where T : IDomainEvent
         {
             var domainEvent = DomainEventsTestHelper.GetAllDomainEvents(aggregate).OfType<T>().SingleOrDefault();
@@ -51,15 +49,9 @@ namespace Character.UnitTests.SeedWork
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
-                return;
-
-            if (disposing)
-                SystemClock.Reset();
-
-            _disposed = true;
+            SystemClock.Reset();
         }
     }
 }
