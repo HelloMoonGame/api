@@ -19,13 +19,13 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 ARG SONAR_PROJECT_KEY=authentication_api
 ARG SONAR_OGRANIZAION_KEY=hellomoon
 ARG SONAR_HOST_URL=https://sonarcloud.io
-ARG SONAR_TOKEN
+ARG SONAR_TOKEN=
 ARG TARGET_BRANCH=
 ARG PR_BRANCH=
 ARG BRANCH=
 ARG PR_ID=
 
-RUN if [ -n "$PR_ID" ] ; \
+RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   then \
   dotnet sonarscanner begin \
   /k:"$SONAR_PROJECT_KEY" \
@@ -36,7 +36,8 @@ RUN if [ -n "$PR_ID" ] ; \
   /d:sonar.pullrequest.base="$TARGET_BRANCH" \
   /d:sonar.pullrequest.branch="$PR_BRANCH" \
   /d:sonar.pullrequest.key="$PR_ID" \
-  ; else \
+  ; elif [ -n "$SONAR_TOKEN" ] ;\
+  then \
   dotnet sonarscanner begin \
   /k:"$SONAR_PROJECT_KEY" \
   /o:"$SONAR_OGRANIZAION_KEY" \
@@ -56,8 +57,8 @@ RUN dotnet test \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=opencover \
   /p:CoverletOutput="/coverage"
-
-RUN dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+  
+RUN if [ -n "$SONAR_TOKEN" ] ; then dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN" ; fi
 
 FROM build AS publish
 RUN dotnet publish "Authentication.Api.csproj" -c Release -o /app/publish
