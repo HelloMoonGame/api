@@ -40,12 +40,7 @@ namespace Character.Api
             services.AddDbContext<CharactersContext>(options =>
                 options.UseNpgsql(Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
 
-            services.AddTransient<ISingleCharacterPerUserChecker, SingleCharacterPerUserChecker>();
-            services.AddTransient<ISingleLocationPerCharacterChecker, SingleLocationPerCharacterChecker>();
-            services.AddTransient<ICharacterRepository, CharacterRepository>();
-            services.AddTransient<ICharacterLocationRepository, CharacterLocationRepository>();
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+            AddDependencies(services);
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddJsonOptions(opts =>
             {
@@ -90,6 +85,16 @@ namespace Character.Api
                     options.TokenValidationParameters.ValidateAudience = false;
                     options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
+        }
+
+        public static void AddDependencies(IServiceCollection services)
+        {
+            services.AddTransient<ISingleCharacterPerUserChecker, SingleCharacterPerUserChecker>();
+            services.AddTransient<ISingleLocationPerCharacterChecker, SingleLocationPerCharacterChecker>();
+            services.AddTransient<ICharacterRepository, CharacterRepository>();
+            services.AddTransient<ICharacterLocationRepository, CharacterLocationRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
