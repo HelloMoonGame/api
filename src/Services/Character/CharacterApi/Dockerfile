@@ -7,7 +7,7 @@ ENV ASPNETCORE_Kestrel__Certificates__Default__Path "/app/localhost.pfx"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password "plaintext"
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src/CharacterApi
+WORKDIR /src/Services/Character/CharacterApi
 RUN dotnet dev-certs https --export-path ./localhost.pfx -p plaintext
 
 RUN mkdir -p /usr/share/man/man1
