@@ -99,6 +99,8 @@ namespace Authentication.Api
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
             }
+            
+            SeedData.EnsureSeedData(app.ApplicationServices);
 
             app.UseCors("default");
 

@@ -108,6 +108,8 @@ namespace Character.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+            
+            SeedData.EnsureSeedData(app.ApplicationServices);
 
             app.UseRouting();
 

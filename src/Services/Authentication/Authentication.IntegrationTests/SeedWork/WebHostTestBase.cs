@@ -10,9 +10,8 @@ namespace Authentication.IntegrationTests.SeedWork
         protected TestServer Server;
         protected HttpClient Client;
 
-        public WebHostTestBase()
+        protected WebHostTestBase()
         {
-
             var webHostBuilder =
                 new WebHostBuilder()
                     .UseEnvironment("Test")
