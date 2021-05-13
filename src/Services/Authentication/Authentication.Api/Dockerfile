@@ -32,7 +32,7 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   /o:"$SONAR_OGRANIZAION_KEY" \
   /d:sonar.host.url="$SONAR_HOST_URL" \
   /d:sonar.login="$SONAR_TOKEN" \
-  /d:sonar.cs.opencover.reportsPaths=/coverage.opencover.xml \
+  /d:sonar.cs.opencover.reportsPaths=/coverage/coverage.opencover.xml \
   /d:sonar.pullrequest.base="$TARGET_BRANCH" \
   /d:sonar.pullrequest.branch="$PR_BRANCH" \
   /d:sonar.pullrequest.key="$PR_ID" \
@@ -53,8 +53,13 @@ RUN dotnet restore Services/Authentication/Authentication.Api/Authentication.Api
 COPY . .
 RUN dotnet build Services/Authentication/Authentication.Api/Authentication.Api.csproj -c Release -o /app/build
 
-RUN cd Services/Authentication/
-RUN dotnet test \
+RUN dotnet test Services/Authentication/Authentication.UnitTests/Authentication.UnitTests.csproj \
+  /p:CollectCoverage=true \
+  /p:CoverletOutputFormat=\"json,opencover\" \
+  /p:CoverletOutput="/coverage/" \
+  /p:MergeWith="/coverage/coverage.json"
+
+RUN dotnet test Services/Authentication/Authentication.IntegrationTests/Authentication.IntegrationTests.csproj \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=\"json,opencover\" \
   /p:CoverletOutput="/coverage/" \

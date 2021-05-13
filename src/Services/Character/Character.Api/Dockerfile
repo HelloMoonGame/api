@@ -53,8 +53,13 @@ RUN dotnet restore Services/Character/Character.Api/Character.Api.csproj
 COPY . .
 RUN dotnet build Services/Character/Character.Api/Character.Api.csproj -c Release -o /app/build
 
-RUN cd Services/Character/
-RUN dotnet test \
+RUN dotnet test Services/Character/Character.UnitTests/Character.UnitTests.csproj \
+  /p:CollectCoverage=true \
+  /p:CoverletOutputFormat=\"json,opencover\" \
+  /p:CoverletOutput="/coverage/" \
+  /p:MergeWith="/coverage/coverage.json"
+
+RUN dotnet test Services/Character/Character.IntegrationTests/Character.IntegrationTests.csproj \
   /p:CollectCoverage=true \
   /p:CoverletOutputFormat=\"json,opencover\" \
   /p:CoverletOutput="/coverage/" \
