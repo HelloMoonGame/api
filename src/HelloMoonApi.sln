@@ -3,9 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterApi", "CharacterApi\CharacterApi.csproj", "{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Character.Api", "Services\Character\Character.Api\Character.Api.csproj", "{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationApi", "AuthenticationApi\AuthenticationApi.csproj", "{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.Api", "Services\Authentication\Authentication.Api\Authentication.Api.csproj", "{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{AD7677BA-88F3-4297-B869-C48C63A338EE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Character", "Character", "{7462C3CA-8500-4884-B2E8-D1D23BBD42CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Character.UnitTests", "Services\Character\Character.UnitTests\Character.UnitTests.csproj", "{51245328-CA69-4618-87CA-E99D6BB9A69B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Character.IntegrationTests", "Services\Character\Character.IntegrationTests\Character.IntegrationTests.csproj", "{7FB4C677-FA5E-4A5C-9E5F-35503280EB35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +29,23 @@ Global
 		{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51245328-CA69-4618-87CA-E99D6BB9A69B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51245328-CA69-4618-87CA-E99D6BB9A69B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51245328-CA69-4618-87CA-E99D6BB9A69B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51245328-CA69-4618-87CA-E99D6BB9A69B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FB4C677-FA5E-4A5C-9E5F-35503280EB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FB4C677-FA5E-4A5C-9E5F-35503280EB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FB4C677-FA5E-4A5C-9E5F-35503280EB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FB4C677-FA5E-4A5C-9E5F-35503280EB35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0C2A9EC3-FA8B-44F8-9768-EABBAEDEE9EE} = {7462C3CA-8500-4884-B2E8-D1D23BBD42CA}
+		{9ED4AE10-1DA8-4723-861B-4EAF0E2637F4} = {AD7677BA-88F3-4297-B869-C48C63A338EE}
+		{51245328-CA69-4618-87CA-E99D6BB9A69B} = {7462C3CA-8500-4884-B2E8-D1D23BBD42CA}
+		{7FB4C677-FA5E-4A5C-9E5F-35503280EB35} = {7462C3CA-8500-4884-B2E8-D1D23BBD42CA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5D904CB0-4CE3-453F-8583-1FFA62283205}

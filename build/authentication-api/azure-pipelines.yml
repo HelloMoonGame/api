@@ -9,7 +9,7 @@ trigger:
     - build/authentication-api/azure-pipelines.yml
     - deploy/authentication-db.yaml
     - deploy/authentication-api.yaml
-    - src/AuthenticationApi/*
+    - src/Services/Authentication/*
 
 resources:
 - repo: self
@@ -32,7 +32,8 @@ stages:
       inputs:
         repository: 'hellomoon/authentication-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/AuthenticationApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
         arguments: >-
@@ -78,7 +79,8 @@ stages:
       inputs:
         repository: 'hellomoon/authentication-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/AuthenticationApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Authentication/Authentication.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
           latest

@@ -9,7 +9,7 @@ trigger:
     - build/character-api/azure-pipelines.yml
     - deploy/character-db.yaml
     - deploy/character-api.yaml
-    - src/CharacterApi/*
+    - src/Services/Character/*
 
 resources:
 - repo: self
@@ -32,7 +32,8 @@ stages:
       inputs:
         repository: 'hellomoon/character-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Character/Character.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
         arguments: >-
@@ -78,7 +79,8 @@ stages:
       inputs:
         repository: 'hellomoon/character-api'
         command: build
-        dockerfile: '$(Build.SourcesDirectory)/src/CharacterApi/Dockerfile'
+        dockerfile: '$(Build.SourcesDirectory)/src/Services/Character/Character.Api/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
           $(tag)
           latest
