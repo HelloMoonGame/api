@@ -5,7 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>7c71bdc1-cfb6-4c23-be0a-197453231edc</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DocumentationFile>Character.API.xml</DocumentationFile>
+    <DocumentationFile>Character.Api.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
@@ -28,12 +28,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.5.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Character.API.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
