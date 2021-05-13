@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Character.Api;
-using Character.Api.Configuration;
+﻿using System.Threading.Tasks;
 using Character.IntegrationTests.SeedWork;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Character.IntegrationTests.Configuration
 {
