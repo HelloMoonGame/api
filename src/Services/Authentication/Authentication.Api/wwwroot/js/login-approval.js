@@ -1,12 +1,7 @@
 ﻿function validateLoginAttempt() {
     $.post("/Account/CheckLoginApproval",
-        {
-            id: $('input#loginAttemptId').val(),
-            returnUrl: $('input#returnUrl').val(),
-            rememberLogin: $('input#rememberLogin').val()
-        },
+        $("form#loginApproval").serialize(),
         function (data) {
-            console.log(data);
             if (data.expired || data.approved) {
                 window.location.href = data.returnUrl;
             } else {
@@ -15,7 +10,7 @@
         });
 }
 
-var expiryDate = new Date($('input#expiryDate').val());
+var expiryDate = new Date($('input#ExpiryDate').val());
 function updateTimeLeft() {
     var timeLeft = (expiryDate - new Date()) / 1000,
         secondsLeft = parseInt(timeLeft % 60),

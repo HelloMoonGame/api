@@ -6,11 +6,12 @@
         <h1>Login</h1>
         <p>An email has been send to you to approve this login attempt. Please keep this browser tab open and return after clicking the link in the email.</p>
         <p>Time left to approve: <span id="timeLeft">...</span></p>
-
-        <input type="hidden" id="loginAttemptId" value="@Model.Id" />
-        <input type="hidden" id="returnUrl" value="@Model.ReturnUrl" />
-        <input type="hidden" id="rememberLogin" value="@Model.RememberLogin" />
-        <input type="hidden" id="expiryDate" value="@Model.ExpiryDate.ToString("G", CultureInfo.InvariantCulture) GMT" />
+        <form id="loginApproval">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ReturnUrl" />
+            <input type="hidden" asp-for="RememberLogin" />
+        </form>
+        <input type="hidden" asp-for="ExpiryDate" value="@Model.ExpiryDate.ToString("G", CultureInfo.InvariantCulture) GMT" />
     </div>
 </div>
 
