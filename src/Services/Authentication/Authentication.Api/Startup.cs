@@ -41,8 +41,7 @@ namespace Authentication.Api
             
             services.AddControllersWithViews();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            AddDatabase(services);
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
@@ -85,6 +84,12 @@ namespace Authentication.Api
             
             services.AddTransient(_ => mailConfig);
             services.AddTransient<IMailService, MailService>();
+        }
+
+        protected virtual void AddDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         public void Configure(IApplicationBuilder app)
