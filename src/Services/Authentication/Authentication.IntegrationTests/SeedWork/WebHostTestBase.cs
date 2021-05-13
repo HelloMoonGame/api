@@ -1,32 +1,29 @@
 ﻿using System;
 using System.Net.Http;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
+using Authentication.Api;
+using Authentication.IntegrationTests.Mocks;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Authentication.IntegrationTests.SeedWork
 {
     public abstract class WebHostTestBase : IDisposable
     {
-        protected TestServer Server;
+        protected WebApplicationFactory<Startup> Factory;
         protected HttpClient Client;
 
         protected WebHostTestBase()
         {
-            var webHostBuilder =
-                new WebHostBuilder()
-                    .UseEnvironment("Test")
-                    .UseStartup<TestStartup>();
-            
-            Server = new TestServer(webHostBuilder);
-            Client = Server.CreateClient();
+            Factory = new CustomWebApplicationFactory<Startup>();
+            Client = Factory.CreateClient();
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Server?.Dispose();
+                MailServiceMock.MailsSent.Clear();
                 Client?.Dispose();
+                Factory?.Dispose();
             }
         }
 
