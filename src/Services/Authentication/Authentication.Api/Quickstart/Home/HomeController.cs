@@ -1,3 +1,4 @@
+using System.Net;
 using System.Threading.Tasks;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,9 @@ namespace Authentication.Api.Quickstart.Home
                 }
             }
 
-            return View("Error", vm);
+            var output = View("Error", vm);
+            output.StatusCode = (int)HttpStatusCode.InternalServerError;
+            return output;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Web;
 using AngleSharp.Html.Dom;
 using Authentication.Api.Quickstart.Account;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Authentication.IntegrationTests.Helpers
 {
@@ -47,8 +48,8 @@ namespace Authentication.IntegrationTests.Helpers
         {
             return StartLoginAttempt(client, "docs", "https://docs.hellomoon.nl/auth/signin-callback", email);
         }
-
-        private static async Task<IHtmlDocument> StartLoginAttempt(HttpClient client, string clientId, string redirectUri, string email)
+        
+        public static async Task<IHtmlDocument> GetLoginPage(this HttpClient client, string clientId, string redirectUri)
         {
             var initUrl = "/connect/authorize?client_id=" + clientId +
                           "&redirect_uri=" + HttpUtility.UrlEncode(redirectUri) +
@@ -60,8 +61,12 @@ namespace Authentication.IntegrationTests.Helpers
                           "&response_mode=query";
             var result = await client.GetAsync(initUrl);
 
-            var content = await result.GetDocumentAsync();
-
+            return await result.GetDocumentAsync();
+        }
+        
+        private static async Task<IHtmlDocument> StartLoginAttempt(HttpClient client, string clientId, string redirectUri, string email)
+        {
+            var content = await client.GetLoginPage(clientId, redirectUri);
             var loginAttempt = await client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='login']"),
                 (IHtmlButtonElement)content.QuerySelector("button[value='login']"),
