@@ -104,7 +104,7 @@ namespace Authentication.Api.Quickstart.Consent
             ConsentResponse grantedConsent = null;
 
             // user clicked 'no' - send back the standard 'access_denied' response
-            if (model?.Button == "no")
+            if (model.Button == "no")
             {
                 grantedConsent = new ConsentResponse { Error = AuthorizationError.AccessDenied };
 
@@ -112,16 +112,12 @@ namespace Authentication.Api.Quickstart.Consent
                 await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
             }
             // user clicked 'yes' - validate the data
-            else if (model?.Button == "yes")
+            else if (model.Button == "yes")
             {
                 // if the user consented to some scope, build the response model
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
                 {
                     var scopes = model.ScopesConsented;
-                    if (ConsentOptions.EnableOfflineAccess == false)
-                    {
-                        scopes = scopes.Where(x => x != IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess);
-                    }
 
                     grantedConsent = new ConsentResponse
                     {
@@ -206,10 +202,6 @@ namespace Authentication.Api.Quickstart.Consent
                     apiScopes.Add(scopeVm);
                 }
             }
-            if (ConsentOptions.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
-            {
-                apiScopes.Add(GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null));
-            }
             vm.ApiScopes = apiScopes;
 
             return vm;
@@ -244,18 +236,6 @@ namespace Authentication.Api.Quickstart.Consent
                 Emphasize = apiScope.Emphasize,
                 Required = apiScope.Required,
                 Checked = check || apiScope.Required
-            };
-        }
-
-        private ScopeViewModel GetOfflineAccessScope(bool check)
-        {
-            return new ScopeViewModel
-            {
-                Value = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
-                DisplayName = ConsentOptions.OfflineAccessDisplayName,
-                Description = ConsentOptions.OfflineAccessDescription,
-                Emphasize = true,
-                Checked = check
             };
         }
     }
