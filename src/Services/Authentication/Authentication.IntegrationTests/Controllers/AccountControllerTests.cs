@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using AngleSharp.Html.Dom;
 using Authentication.Api.Models.Email;
-using Authentication.Api.Quickstart.Account;
 using Authentication.IntegrationTests.Helpers;
 using Authentication.IntegrationTests.Mocks;
 using Authentication.IntegrationTests.SeedWork;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Authentication.IntegrationTests.Controllers
 {
@@ -19,7 +16,7 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task Welcome_mail_is_sent_if_new_user_tries_to_login()
         {
             // Act
-            await StartLoginAttempt("test@test.com");
+            await Client.StartLoginAttemptToGame("test@test.com");
 
             // Assert
             Assert.AreEqual(1, MailServiceMock.MailsSent.Count);
@@ -31,7 +28,7 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task Login_mail_is_sent_if_existing_user_tries_to_login()
         {
             // Act
-            await StartLoginAttempt("AliceSmith@email.com");
+            await Client.StartLoginAttemptToGame("AliceSmith@email.com");
 
             // Assert
             Assert.AreEqual(1, MailServiceMock.MailsSent.Count);
@@ -43,7 +40,7 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task Timer_is_shown_if_user_tries_to_login()
         {
             // Act
-            var loginAttemptDocument = await StartLoginAttempt("test@test.com");
+            var loginAttemptDocument = await Client.StartLoginAttemptToGame("test@test.com");
 
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, loginAttemptDocument.StatusCode);
@@ -54,29 +51,29 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task Login_hangs_while_attempt_is_not_approved()
         {
             // Arrange
-            var loginAttemptDocument = await StartLoginAttempt("test@test.com");
+            var loginAttemptDocument = await Client.StartLoginAttemptToGame("test@test.com");
 
             // Act
-            var checkResult = await CheckLogin(loginAttemptDocument);
+            var checkResult = await Client.CheckLogin(loginAttemptDocument);
 
             // Assert
-            Assert.AreEqual(LoginAttemptStatus.Pending, checkResult.Status);
+            Assert.AreEqual(LoginHelpers.LoginAttemptStatus.Pending, checkResult.Status);
         }
 
         [TestMethod]
         public async Task Login_continues_after_attempt_is_approved()
         {
             // Arrange
-            var loginAttemptDocument = await StartLoginAttempt("test@test.com");
+            var loginAttemptDocument = await Client.StartLoginAttemptToGame("test@test.com");
             var approvalMail = MailServiceMock.MailsSent[0].Model as NewUserEmailModel;
 
             // Act
-            await ApproveLogin(approvalMail?.ConfirmUrl);
-            var checkResult = await CheckLogin(loginAttemptDocument);
+            await Client.ApproveLogin(approvalMail?.ConfirmUrl);
+            var checkResult = await Client.CheckLogin(loginAttemptDocument);
             var returnResult = await Client.GetAsync(checkResult.ReturnUrl);
 
             // Assert
-            Assert.AreEqual(LoginAttemptStatus.Accepted, checkResult.Status);
+            Assert.AreEqual(LoginHelpers.LoginAttemptStatus.Accepted, checkResult.Status);
             Assert.IsTrue(returnResult.RequestMessage?.RequestUri?.ToString().StartsWith("http://localhost:3000") ?? false, $"User is forwarded to {returnResult.RequestMessage?.RequestUri}, while it was expected to go to http://localhost:3000");
             Assert.IsTrue(!returnResult.RequestMessage?.RequestUri?.ToString().Contains("error=access_denied") ?? false, $"User is forwarded to {returnResult.RequestMessage?.RequestUri}, while the url should contain 'error=access_denied'.");
         }
@@ -85,16 +82,16 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task User_returns_with_error_to_game_after_attempt_is_rejected()
         {
             // Arrange
-            var loginAttemptDocument = await StartLoginAttempt("test@test.com");
+            var loginAttemptDocument = await Client.StartLoginAttemptToGame("test@test.com");
             var approvalMail = MailServiceMock.MailsSent[0].Model as NewUserEmailModel;
 
             // Act
-            await RejectLogin(approvalMail?.ConfirmUrl);
-            var checkResult = await CheckLogin(loginAttemptDocument);
+            await Client.RejectLogin(approvalMail?.ConfirmUrl);
+            var checkResult = await Client.CheckLogin(loginAttemptDocument);
             var returnResult = await Client.GetAsync(checkResult.ReturnUrl);
 
             // Assert
-            Assert.AreEqual(LoginAttemptStatus.ExpiredOrRejected, checkResult.Status);
+            Assert.AreEqual(LoginHelpers.LoginAttemptStatus.ExpiredOrRejected, checkResult.Status);
             Assert.IsTrue(returnResult.RequestMessage?.RequestUri?.ToString().StartsWith("http://localhost:3000") ?? false, $"User is forwarded to {returnResult.RequestMessage?.RequestUri}, while it was expected to go to http://localhost:3000");
             Assert.IsTrue(returnResult.RequestMessage.RequestUri.ToString().Contains("error=access_denied"), $"User is forwarded to {returnResult.RequestMessage.RequestUri}, while the url should contain 'error=access_denied'.");
         }
@@ -115,7 +112,7 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task Authenticated_users_get_a_confirm_page_when_trying_to_logout()
         {
             // Arrange
-            await LoginUser("test@test.com");
+            await LoginUserToGame("test@test.com");
 
             // Act
             var logoutResponse = await Client.GetAsync("/Account/Logout");
@@ -130,7 +127,7 @@ namespace Authentication.IntegrationTests.Controllers
         public async Task User_gets_a_confirmation_after_logout()
         {
             // Arrange
-            await LoginUser("test@test.com");
+            await LoginUserToGame("test@test.com");
 
             // Act
             var logoutResponse = await Client.GetAsync("/Account/Logout");
@@ -144,93 +141,12 @@ namespace Authentication.IntegrationTests.Controllers
             Assert.IsNotNull(loggedOutPage.GetElementsByClassName("logged-out-page"));
         }
 
-        private async Task LoginUser(string email)
+        private async Task LoginUserToGame(string email)
         {
-            var loginAttemptDocument = await StartLoginAttempt(email);
+            var loginAttemptDocument = await Client.StartLoginAttemptToGame(email);
             var confirmationMail = MailServiceMock.MailsSent[0].Model as NewUserEmailModel;
-            await ApproveLogin(confirmationMail?.ConfirmUrl);
-            await CheckLogin(loginAttemptDocument);
-        }
-
-        private Task ApproveLogin(string confirmUrl)
-        {
-            return OpenLinkInAuthenticationMail(confirmUrl, "yes");
-        }
-
-        private Task RejectLogin(string confirmUrl)
-        {
-            return OpenLinkInAuthenticationMail(confirmUrl, "no");
-        }
-
-        private async Task OpenLinkInAuthenticationMail(string confirmUrl, string button)
-        {
-            var approvalResponse = await Client.GetAsync(confirmUrl);
-            var approvalPage = await approvalResponse.GetDocumentAsync();
-
-            await Client.SendAsync(
-                approvalPage.Forms["confirmLogin"],
-                (IHtmlElement)approvalPage.QuerySelector("button[value='" + button + "']"));
-        }
-
-        private async Task<LoginAttemptStatusResult> CheckLogin(IHtmlDocument loginAttemptDocument)
-        {
-            var loginAttemptId = loginAttemptDocument.GetInputFieldValue(nameof(LoginAttemptViewModel.Id));
-            var returnUrl = loginAttemptDocument.GetInputFieldValue(nameof(LoginAttemptViewModel.ReturnUrl));
-            var rememberLogin = loginAttemptDocument.GetInputFieldValue(nameof(LoginAttemptViewModel.RememberLogin));
-
-            var checkResult = await Client.PostAsync("/Account/CheckLoginApproval", new Dictionary<string, string>
-            {
-                {nameof(LoginAttemptInputModel.Id), loginAttemptId},
-                {nameof(LoginAttemptInputModel.ReturnUrl), returnUrl},
-                {nameof(LoginAttemptInputModel.RememberLogin), rememberLogin}
-            });
-
-            var checkResultContent = JObject.Parse(await checkResult.Content.ReadAsStringAsync());
-            var returnUrlFromResponse = checkResultContent["returnUrl"]?.Value<string>();
-
-            if (checkResultContent["expired"]?.Value<bool>() == true)
-                return new LoginAttemptStatusResult
-                { Status = LoginAttemptStatus.ExpiredOrRejected, ReturnUrl = returnUrlFromResponse };
-
-            if (checkResultContent["approved"]?.Value<bool>() == true)
-                return new LoginAttemptStatusResult
-                { Status = LoginAttemptStatus.Accepted, ReturnUrl = returnUrlFromResponse };
-
-            return new LoginAttemptStatusResult { Status = LoginAttemptStatus.Pending };
-        }
-
-        public record LoginAttemptStatusResult
-        {
-            public LoginAttemptStatus Status { get; init; }
-            public string ReturnUrl { get; init; }
-        }
-
-        public enum LoginAttemptStatus
-        {
-            Pending,
-            ExpiredOrRejected,
-            Accepted
-        }
-
-        private async Task<IHtmlDocument> StartLoginAttempt(string email)
-        {
-            var initUrl = "/connect/authorize?client_id=game" +
-                      "&redirect_uri=http%3A%2F%2Flocalhost:3000%2Fauth%2Fsignin-callback" +
-                      "&response_type=code" +
-                      "&scope=openid%20profile%20characterapi" +
-                      "&state=bdbb7be6a4de42e6858fa1eda338f97b" +
-                      "&code_challenge=12-sp-8M_TUlBzp2DcpPsmzzib3ZimtVqpSuDF19eyU" +
-                      "&code_challenge_method=S256" +
-                      "&response_mode=query";
-            var result = await Client.GetAsync(initUrl);
-            
-            var content = await result.GetDocumentAsync();
-
-            var loginAttempt = await Client.SendAsync(
-                (IHtmlFormElement)content.QuerySelector("form[id='login']"),
-                (IHtmlButtonElement)content.QuerySelector("button[value='login']"),
-                new[] { new KeyValuePair<string, string>(nameof(LoginInputModel.Email), email) });
-            return await loginAttempt.GetDocumentAsync();
+            await Client.ApproveLogin(confirmationMail?.ConfirmUrl);
+            await Client.CheckLogin(loginAttemptDocument);
         }
     }
 }
