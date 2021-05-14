@@ -11,8 +11,6 @@ using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +28,6 @@ namespace Authentication.Api.Quickstart.Account
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly IIdentityServerInteractionService _interaction;
-        private readonly IClientStore _clientStore;
-        private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
         private readonly IMailService _mailService;
 
@@ -41,8 +37,6 @@ namespace Authentication.Api.Quickstart.Account
             ApplicationDbContext dbContext,
             IConfiguration configuration,
             IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
-            IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             IMailService mailService)
         {
@@ -51,8 +45,6 @@ namespace Authentication.Api.Quickstart.Account
             _dbContext = dbContext;
             _configuration = configuration;
             _interaction = interaction;
-            _clientStore = clientStore;
-            _schemeProvider = schemeProvider;
             _events = events;
             _mailService = mailService;
         }
@@ -63,15 +55,8 @@ namespace Authentication.Api.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> Login(string returnUrl)
         {
-            // build a model so we know what to show on the login page
             var vm = await BuildLoginViewModelAsync(returnUrl);
-
-            if (vm.IsExternalLoginOnly)
-            {
-                // we only have one option for logging in and it's an external provider
-                return RedirectToAction("Challenge", "External", new { scheme = vm.ExternalLoginScheme, returnUrl });
-            }
-
+            
             return View(vm);
         }
 
@@ -173,7 +158,7 @@ namespace Authentication.Api.Quickstart.Account
         }
 
         /// <summary>
-        /// Handle postback from email login
+        /// Try to login
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -226,7 +211,7 @@ namespace Authentication.Api.Quickstart.Account
         }
 
         /// <summary>
-        /// Wait dor approval of the login attempt
+        /// Wait for approval of the login attempt
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> WaitForLoginApproval(LoginAttemptInputModel model, string button)
@@ -347,16 +332,10 @@ namespace Authentication.Api.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> Logout(string logoutId)
         {
-            // build a model so the logout page knows what to display
-            var vm = await BuildLogoutViewModelAsync(logoutId);
-
-            if (vm.ShowLogoutPrompt == false)
-            {
-                // if the request for logout was properly authenticated from IdentityServer, then
-                // we don't need to show the prompt and can just log the user out directly.
+            var vm = new LogoutInputModel { LogoutId = logoutId };
+            if (User?.Identity?.IsAuthenticated != true)
                 return await Logout(vm);
-            }
-
+            
             return View(vm);
         }
 
@@ -378,35 +357,13 @@ namespace Authentication.Api.Quickstart.Account
                 // raise the logout event
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
             }
-
-            // check if we need to trigger sign-out at an upstream identity provider
-            if (vm.TriggerExternalSignout)
-            {
-                // build a return URL so the upstream provider will redirect back
-                // to us after the user has logged out. this allows us to then
-                // complete our single sign-out processing.
-                string url = Url.Action("Logout", new { logoutId = vm.LogoutId });
-
-                // this triggers a redirect to the external provider for sign-out
-                return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
-            }
-
+            
             return View("LoggedOut", vm);
         }
-
-        [HttpGet]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
-
-        /*****************************************/
-        /* helper APIs for the AccountController */
-        /*****************************************/
+        
         private LoginAttemptConfirmViewModel BuildLoginAttemptConfirmViewModel(LoginAttempt loginAttempt)
         {
-            return new LoginAttemptConfirmViewModel
+            return new()
             {
                 Id = loginAttempt?.Id,
                 ExpiredOrNonExisting = loginAttempt == null || loginAttempt.ExpiryDate < DateTime.UtcNow,
@@ -414,94 +371,15 @@ namespace Authentication.Api.Quickstart.Account
             };
         }
 
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
+        private async Task<LoginInputModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
+            
+            return new LoginInputModel
             {
-                var local = context.IdP == IdentityServer4.IdentityServerConstants.LocalIdentityProvider;
-
-                // this is meant to short circuit the UI and only trigger the one external IdP
-                var vm = new LoginViewModel
-                {
-                    EnableLocalLogin = local,
-                    ReturnUrl = returnUrl,
-                    Email = context.LoginHint,
-                };
-
-                if (!local)
-                {
-                    vm.ExternalProviders = new[] { new ExternalProvider { AuthenticationScheme = context.IdP } };
-                }
-
-                return vm;
-            }
-
-            var schemes = await _schemeProvider.GetAllSchemesAsync();
-
-            var providers = schemes
-                .Where(x => x.DisplayName != null)
-                .Select(x => new ExternalProvider
-                {
-                    DisplayName = x.DisplayName ?? x.Name,
-                    AuthenticationScheme = x.Name
-                }).ToList();
-
-            var allowLocal = true;
-            if (context?.Client.ClientId != null)
-            {
-                var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
-                if (client != null)
-                {
-                    allowLocal = client.EnableLocalLogin;
-
-                    if (client.IdentityProviderRestrictions != null && client.IdentityProviderRestrictions.Any())
-                    {
-                        providers = providers.Where(provider => client.IdentityProviderRestrictions.Contains(provider.AuthenticationScheme)).ToList();
-                    }
-                }
-            }
-
-            return new LoginViewModel
-            {
-                AllowRememberLogin = AccountOptions.AllowRememberLogin,
-                EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
                 ReturnUrl = returnUrl,
-                Email = context?.LoginHint,
-                ExternalProviders = providers.ToArray()
+                Email = context?.LoginHint
             };
-        }
-
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
-        {
-            var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
-            vm.Email = model.Email;
-            vm.RememberLogin = model.RememberLogin;
-            return vm;
-        }
-
-        private async Task<LogoutViewModel> BuildLogoutViewModelAsync(string logoutId)
-        {
-            var vm = new LogoutViewModel { LogoutId = logoutId, ShowLogoutPrompt = AccountOptions.ShowLogoutPrompt };
-
-            if (User?.Identity?.IsAuthenticated != true)
-            {
-                // if the user is not authenticated, then just show logged out page
-                vm.ShowLogoutPrompt = false;
-                return vm;
-            }
-
-            var context = await _interaction.GetLogoutContextAsync(logoutId);
-            if (context?.ShowSignoutPrompt == false)
-            {
-                // it's safe to automatically sign-out
-                vm.ShowLogoutPrompt = false;
-                return vm;
-            }
-
-            // show the logout prompt. this prevents attacks where the user
-            // is automatically signed out by another malicious web page.
-            return vm;
         }
 
         private async Task<LoggedOutViewModel> BuildLoggedOutViewModelAsync(string logoutId)
@@ -511,7 +389,6 @@ namespace Authentication.Api.Quickstart.Account
 
             var vm = new LoggedOutViewModel
             {
-                AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
                 PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
                 ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout.ClientName,
                 SignOutIframeUrl = logout?.SignOutIFrameUrl,
@@ -533,8 +410,6 @@ namespace Authentication.Api.Quickstart.Account
                             // before we signout and redirect away to the external IdP for signout
                             vm.LogoutId = await _interaction.CreateLogoutContextAsync();
                         }
-
-                        vm.ExternalAuthenticationScheme = idp;
                     }
                 }
             }
