@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Authentication.Api.Quickstart.Home
 {
@@ -14,25 +13,11 @@ namespace Authentication.Api.Quickstart.Home
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IWebHostEnvironment _environment;
-        private readonly ILogger _logger;
 
-        public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger)
+        public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment)
         {
             _interaction = interaction;
             _environment = environment;
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            if (_environment.IsDevelopment())
-            {
-                // only show in development
-                return View();
-            }
-
-            _logger.LogInformation("Homepage is disabled in production. Returning 404.");
-            return NotFound();
         }
 
         /// <summary>
@@ -42,7 +27,7 @@ namespace Authentication.Api.Quickstart.Home
         {
             var vm = new ErrorViewModel();
 
-            // retrieve error details from identityserver
+            // retrieve error details from identity server
             var message = await _interaction.GetErrorContextAsync(errorId);
             if (message != null)
             {
@@ -50,7 +35,6 @@ namespace Authentication.Api.Quickstart.Home
 
                 if (!_environment.IsDevelopment())
                 {
-                    // only show in development
                     message.ErrorDescription = null;
                 }
             }
