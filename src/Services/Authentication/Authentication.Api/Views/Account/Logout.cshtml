@@ -6,7 +6,7 @@
         <p>Would you like to logut of IdentityServer?</p>
     </div>
 
-    <form asp-action="Logout">
+    <form asp-action="Logout" id="logout">
         <input type="hidden" name="logoutId" value="@Model.LogoutId"  />
         <div class="form-group">
             <button class="btn btn-primary">Yes</button>

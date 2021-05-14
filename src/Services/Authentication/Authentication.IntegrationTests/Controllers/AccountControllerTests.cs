@@ -98,6 +98,59 @@ namespace Authentication.IntegrationTests.Controllers
             Assert.IsTrue(returnResult.RequestMessage?.RequestUri?.ToString().StartsWith("http://localhost:3000") ?? false, $"User is forwarded to {returnResult.RequestMessage?.RequestUri}, while it was expected to go to http://localhost:3000");
             Assert.IsTrue(returnResult.RequestMessage.RequestUri.ToString().Contains("error=access_denied"), $"User is forwarded to {returnResult.RequestMessage.RequestUri}, while the url should contain 'error=access_denied'.");
         }
+        
+        [TestMethod]
+        public async Task Unauthenticated_users_do_not_have_to_confirm_logout()
+        {
+            // Act
+            var logoutResponse = await Client.GetAsync("/Account/Logout");
+            var logoutPage = await logoutResponse.GetDocumentAsync();
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, logoutResponse.StatusCode);
+            Assert.IsNull(logoutPage.Forms["logout"]);
+        }
+
+        [TestMethod]
+        public async Task Authenticated_users_get_a_confirm_page_when_trying_to_logout()
+        {
+            // Arrange
+            await LoginUser("test@test.com");
+
+            // Act
+            var logoutResponse = await Client.GetAsync("/Account/Logout");
+            var logoutPage = await logoutResponse.GetDocumentAsync();
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, logoutResponse.StatusCode);
+            Assert.IsNotNull(logoutPage.Forms["logout"]);
+        }
+
+        [TestMethod]
+        public async Task User_gets_a_confirmation_after_logout()
+        {
+            // Arrange
+            await LoginUser("test@test.com");
+
+            // Act
+            var logoutResponse = await Client.GetAsync("/Account/Logout");
+            var logoutPage = await logoutResponse.GetDocumentAsync();
+            var loggedOutResponse = await Client.SendAsync(logoutPage.Forms["logout"], 
+                (IHtmlElement)logoutPage.Forms["logout"].QuerySelector("button"));
+            var loggedOutPage = await loggedOutResponse.GetDocumentAsync();
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, loggedOutPage.StatusCode);
+            Assert.IsNotNull(loggedOutPage.GetElementsByClassName("logged-out-page"));
+        }
+
+        private async Task LoginUser(string email)
+        {
+            var loginAttemptDocument = await StartLoginAttempt(email);
+            var confirmationMail = MailServiceMock.MailsSent[0].Model as NewUserEmailModel;
+            await ApproveLogin(confirmationMail?.ConfirmUrl);
+            await CheckLogin(loginAttemptDocument);
+        }
 
         private Task ApproveLogin(string confirmUrl)
         {
@@ -115,8 +168,8 @@ namespace Authentication.IntegrationTests.Controllers
             var approvalPage = await approvalResponse.GetDocumentAsync();
 
             await Client.SendAsync(
-                (IHtmlFormElement)approvalPage.QuerySelector("form[id='confirmLogin']"),
-                (IHtmlButtonElement)approvalPage.QuerySelector("button[value='" + button + "']"));
+                approvalPage.Forms["confirmLogin"],
+                (IHtmlElement)approvalPage.QuerySelector("button[value='" + button + "']"));
         }
 
         private async Task<LoginAttemptStatusResult> CheckLogin(IHtmlDocument loginAttemptDocument)
