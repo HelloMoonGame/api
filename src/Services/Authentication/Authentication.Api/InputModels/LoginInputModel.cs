@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Authentication.Api.Quickstart.Account
+namespace Authentication.Api.InputModels
 {
     public class LoginInputModel
     {

@@ -1,4 +1,6 @@
-﻿namespace Authentication.Api.Quickstart.Account
+﻿using Authentication.Api.InputModels;
+
+namespace Authentication.Api.ViewModels
 {
     public class LoginAttemptConfirmViewModel : LoginAttemptConfirmInputModel
     {

@@ -1,9 +1,9 @@
 using System;
-using Authentication.Api.Quickstart.Account;
+using Authentication.Api.ViewModels;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authentication.Api.Quickstart
+namespace Authentication.Api.Infrastructure
 {
     public static class Extensions
     {

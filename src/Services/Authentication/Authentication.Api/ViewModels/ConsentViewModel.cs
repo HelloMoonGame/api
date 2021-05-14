@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using Authentication.Api.InputModels;
 
-namespace Authentication.Api.Quickstart.Consent
+namespace Authentication.Api.ViewModels
 {
     public class ConsentViewModel : ConsentInputModel
     {

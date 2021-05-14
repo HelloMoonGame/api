@@ -3,7 +3,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using AngleSharp.Html.Dom;
-using Authentication.Api.Quickstart.Account;
+using Authentication.Api.InputModels;
+using Authentication.Api.ViewModels;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Math.EC.Rfc7748;
 

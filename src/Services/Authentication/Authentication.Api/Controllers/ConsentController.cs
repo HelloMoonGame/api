@@ -1,11 +1,11 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Authentication.Api.Infrastructure;
+using Authentication.Api.InputModels;
+using Authentication.Api.Models;
+using Authentication.Api.ViewModels;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Authentication.Api.Quickstart.Consent
+namespace Authentication.Api.Controllers
 {
     /// <summary>
     /// This controller processes the consent UI
@@ -131,12 +131,12 @@ namespace Authentication.Api.Quickstart.Consent
                 }
                 else
                 {
-                    result.ValidationError = ConsentOptions.MustChooseOneErrorMessage;
+                    result.ValidationError = "You must pick at least one permission";
                 }
             }
             else
             {
-                result.ValidationError = ConsentOptions.InvalidSelectionErrorMessage;
+                result.ValidationError = "Invalid selection";
             }
 
             if (grantedConsent != null)

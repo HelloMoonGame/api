@@ -1,4 +1,4 @@
-namespace Authentication.Api.Quickstart.Account
+namespace Authentication.Api.InputModels
 {
     public class LogoutInputModel
     {

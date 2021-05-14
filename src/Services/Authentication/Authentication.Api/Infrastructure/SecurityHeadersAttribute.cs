@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Authentication.Api.Quickstart
+namespace Authentication.Api.Infrastructure
 {
     public class SecurityHeadersAttribute : ActionFilterAttribute
     {

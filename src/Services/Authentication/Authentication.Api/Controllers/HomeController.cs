@@ -1,12 +1,14 @@
 using System.Net;
 using System.Threading.Tasks;
+using Authentication.Api.Infrastructure;
+using Authentication.Api.ViewModels;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 
-namespace Authentication.Api.Quickstart.Home
+namespace Authentication.Api.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]

@@ -1,6 +1,7 @@
 ﻿using System;
+using Authentication.Api.InputModels;
 
-namespace Authentication.Api.Quickstart.Account
+namespace Authentication.Api.ViewModels
 {
     public class LoginAttemptViewModel : LoginAttemptInputModel
     {

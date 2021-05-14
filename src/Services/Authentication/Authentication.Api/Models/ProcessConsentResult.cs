@@ -1,6 +1,7 @@
+using Authentication.Api.ViewModels;
 using IdentityServer4.Models;
 
-namespace Authentication.Api.Quickstart.Consent
+namespace Authentication.Api.Models
 {
     public class ProcessConsentResult
     {

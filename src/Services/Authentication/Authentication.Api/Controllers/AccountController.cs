@@ -3,9 +3,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Authentication.Api.Data;
+using Authentication.Api.Infrastructure;
+using Authentication.Api.InputModels;
 using Authentication.Api.Models;
 using Authentication.Api.Models.Email;
 using Authentication.Api.Services;
+using Authentication.Api.ViewModels;
 using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
@@ -17,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace Authentication.Api.Quickstart.Account
+namespace Authentication.Api.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]
