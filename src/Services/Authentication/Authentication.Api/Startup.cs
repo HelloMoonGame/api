@@ -2,6 +2,7 @@
 using Authentication.Api.Data;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Authentication.Api
 {
@@ -25,16 +27,14 @@ namespace Authentication.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddPolicy("default", policy =>
+            services.AddSingleton<ICorsPolicyService>(container => {
+                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+                return new DefaultCorsPolicyService(logger)
                 {
-                    policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
+                    AllowAll = true
+                };
             });
-            
+
             services.AddControllersWithViews();
 
             AddDatabase(services);
@@ -97,9 +97,7 @@ namespace Authentication.Api
             }
             
             SeedData.EnsureSeedData(app.ApplicationServices);
-
-            app.UseCors("default");
-
+            
             app.UseStaticFiles();
 
             app.UseRouting();
