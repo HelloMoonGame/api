@@ -4,7 +4,7 @@
     <div class="lead">
         @if (Model.ClientLogoUrl != null)
         {
-            <div class="client-logo"><img src="@Model.ClientLogoUrl"></div>
+            <div class="client-logo"><img src="@Model.ClientLogoUrl" alt="@Model.ClientName"></div>
         }
         <h1>
             @Model.ClientName
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <form asp-action="Index">
+    <form asp-action="Index" id="consent">
         <input type="hidden" asp-for="ReturnUrl" />
         <div class="row">
             <div class="col-sm-8">

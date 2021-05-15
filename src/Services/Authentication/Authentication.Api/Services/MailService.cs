@@ -29,9 +29,12 @@ namespace Authentication.Api.Services
         public async void SendMail(Controller controller, string to, EmailModel model)
         {
             var viewEngine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
-            var view = viewEngine.FindView(controller.ControllerContext, "Email/" + model.ViewName, true);
+            var view = viewEngine?.FindView(controller.ControllerContext, "Email/" + model.ViewName, true);
+            if (view == null)
+                throw new FileNotFoundException("No mail template found for " + model.ViewName);
+            
             controller.ViewData.Model = model;
-            var content = "";
+            string content;
 
             await using (var writer = new StringWriter())
             {
@@ -56,12 +59,17 @@ namespace Authentication.Api.Services
             message.Subject = model.Subject;
             message.Body = new TextPart("html") { Text = content };
 
-            switch (_config.DeliveryMethod)
+            await DeliverMail(_config.DeliveryMethod, message);
+        }
+
+        private Task DeliverMail(DeliveryMethod configDeliveryMethod, MimeMessage message)
+        {
+            switch (configDeliveryMethod)
             {
-                case DeliveryMethod.SpecifiedPickupDirectory: await SaveToPickupDirectory(message); break;
-                case DeliveryMethod.Network: await SendViaNetwork(message); break;
+                case DeliveryMethod.SpecifiedPickupDirectory: return SaveToPickupDirectory(message);
+                case DeliveryMethod.Network: return SendViaNetwork(message);
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(_config.DeliveryMethod), "Unsupported delivery method, only SpecifiedPickupDirectory or Network are allowed");
+                    throw new ArgumentOutOfRangeException(nameof(configDeliveryMethod), "Unsupported delivery method, only SpecifiedPickupDirectory or Network are allowed");
             }
         }
 

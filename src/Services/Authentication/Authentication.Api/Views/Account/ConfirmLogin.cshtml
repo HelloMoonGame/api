@@ -13,7 +13,7 @@
         }
         else
         {
-            <form asp-action="ConfirmLoginFinish">
+            <form asp-action="ConfirmLoginFinish" id="confirmLogin">
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="Secret" />
                 <p>Do you want to accept the login attempt and give access to your account?</p>

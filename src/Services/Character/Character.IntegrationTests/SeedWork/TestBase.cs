@@ -1,25 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Common;
 using Character.Api;
-using Character.Api.Application.CharacterLocations.DomainServices;
-using Character.Api.Application.Characters.DomainServices;
-using Character.Api.Domain.CharacterLocations;
-using Character.Api.Domain.Characters;
-using Character.Api.Domain.SeedWork;
 using Character.Api.Infrastructure.Database;
-using Character.Api.Infrastructure.Domain;
-using Character.Api.Infrastructure.Domain.CharacterLocations;
-using Character.Api.Infrastructure.Domain.Characters;
-using Character.Api.Infrastructure.Processing;
 using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
 namespace Character.IntegrationTests.SeedWork
 {

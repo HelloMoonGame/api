@@ -1,4 +1,4 @@
-@model LoginViewModel
+@model LoginInputModel
 
 <div class="login-page">
     <div class="lead">
@@ -10,7 +10,7 @@
 
     <div class="row">
         <div class="col-sm-6">
-            <form asp-route="Login">
+            <form asp-route="Login" id="login">
                 <input type="hidden" asp-for="ReturnUrl" />
 
                 <div class="form-group">

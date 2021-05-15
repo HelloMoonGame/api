@@ -1,11 +1,8 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using Authentication.Api.Configuration;
+﻿using Authentication.Api.Configuration;
 using Authentication.Api.Data;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Authentication.Api
 {
@@ -29,20 +27,17 @@ namespace Authentication.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddPolicy("default", policy =>
+            services.AddSingleton<ICorsPolicyService>(container => {
+                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+                return new DefaultCorsPolicyService(logger)
                 {
-                    policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
+                    AllowAll = true
+                };
             });
-            
+
             services.AddControllersWithViews();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            AddDatabase(services);
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
@@ -65,18 +60,7 @@ namespace Authentication.Api
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients(Configuration["GameUrl"]))
                 .AddAspNetIdentity<ApplicationUser>();
-
-            // not recommended for production - you need to store your key material somewhere secure
-            // Example:
-            //var x509 = new X509Certificate2(
-            //File.ReadAllBytes(somefilename),somepassword);
-
-            //services.AddIdentityServer(options =>
-            //    {
-            //        the options I care about
-            //    })
-            //    .AddSigningCredential(x509)
-            //    .AddValidationKey(x509);
+            
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
@@ -85,6 +69,14 @@ namespace Authentication.Api
             
             services.AddTransient(_ => mailConfig);
             services.AddTransient<IMailService, MailService>();
+            
+            services.AddDatabaseDeveloperPageExceptionFilter();
+        }
+
+        protected virtual void AddDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         public void Configure(IApplicationBuilder app)
@@ -92,11 +84,11 @@ namespace Authentication.Api
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
-
-            app.UseCors("default");
-
+            
+            SeedData.EnsureSeedData(app.ApplicationServices);
+            
             app.UseStaticFiles();
 
             app.UseRouting();
