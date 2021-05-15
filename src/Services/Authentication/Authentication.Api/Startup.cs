@@ -60,18 +60,7 @@ namespace Authentication.Api
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients(Configuration["GameUrl"]))
                 .AddAspNetIdentity<ApplicationUser>();
-
-            // not recommended for production - you need to store your key material somewhere secure
-            // Example:
-            //var x509 = new X509Certificate2(
-            //File.ReadAllBytes(somefilename),somepassword);
-
-            //services.AddIdentityServer(options =>
-            //    {
-            //        the options I care about
-            //    })
-            //    .AddSigningCredential(x509)
-            //    .AddValidationKey(x509);
+            
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
@@ -80,6 +69,8 @@ namespace Authentication.Api
             
             services.AddTransient(_ => mailConfig);
             services.AddTransient<IMailService, MailService>();
+            
+            services.AddDatabaseDeveloperPageExceptionFilter();
         }
 
         protected virtual void AddDatabase(IServiceCollection services)
@@ -93,7 +84,7 @@ namespace Authentication.Api
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
             
             SeedData.EnsureSeedData(app.ApplicationServices);

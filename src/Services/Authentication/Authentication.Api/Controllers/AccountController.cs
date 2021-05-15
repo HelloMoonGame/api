@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Authentication.Api.Data;
@@ -63,6 +64,59 @@ namespace Authentication.Api.Controllers
             return View(vm);
         }
 
+        /// <summary>
+        /// Try to login
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginInputModel model, string button)
+        {
+            // check if we are in the context of an authorization request
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+
+            // the user clicked the "cancel" button
+            if (button != "login")
+            {
+                return await CancelLogin(context, model.ReturnUrl);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
+
+            await CancelLoginAttemptsForUserId(user.Id);
+            var loginAttempt = await CreateLoginAttempt(user.Id);
+
+            var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
+                new LoginAttemptConfirmInputModel
+                {
+                    Id = loginAttempt.Id,
+                    Secret = loginAttempt.Secret
+                });
+
+            if (!user.EmailConfirmed)
+            {
+                _mailService.SendMail(this, model.Email, new NewUserEmailModel
+                {
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
+                });
+            }
+            else
+            {
+                _mailService.SendMail(this, model.Email, new LoginEmailModel
+                {
+                    ConfirmUrl = confirmUrl,
+                    Email = user.Email,
+                });
+            }
+
+            return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
+            {
+                Id = loginAttempt.Id,
+                RememberLogin = model.RememberLogin,
+                ReturnUrl = model.ReturnUrl
+            });
+        }
+
         private IActionResult RedirectToReturnUrl(AuthorizationRequest context, string returnUrl)
         {
             // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
@@ -89,7 +143,7 @@ namespace Authentication.Api.Controllers
             }
 
             // user might have clicked on a malicious link - should be logged
-            throw new Exception("invalid return URL");
+            throw new AuthenticationException("invalid return URL");
         }
 
         private async Task<IActionResult> CancelLogin(AuthorizationRequest context, string returnUrl)
@@ -121,7 +175,7 @@ namespace Authentication.Api.Controllers
             var result = await _userManager.CreateAsync(user);
             if (!result.Succeeded)
             {
-                throw new Exception(result.Errors.First().Description);
+                throw new AuthenticationException(result.Errors.First().Description);
             }
 
             result = await _userManager.AddClaimsAsync(user, new[]{
@@ -129,7 +183,7 @@ namespace Authentication.Api.Controllers
             });
             if (!result.Succeeded)
             {
-                throw new Exception(result.Errors.First().Description);
+                throw new AuthenticationException(result.Errors.First().Description);
             }
 
             return user;
@@ -158,59 +212,6 @@ namespace Authentication.Api.Controllers
             await _dbContext.SaveChangesAsync();
 
             return loginAttempt;
-        }
-
-        /// <summary>
-        /// Try to login
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginInputModel model, string button)
-        {
-            // check if we are in the context of an authorization request
-            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
-            // the user clicked the "cancel" button
-            if (button != "login")
-            {
-                return await CancelLogin(context, model.ReturnUrl);
-            }
-            
-            var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
-
-            await CancelLoginAttemptsForUserId(user.Id);
-            var loginAttempt = await CreateLoginAttempt(user.Id);
-            
-            var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
-                new LoginAttemptConfirmInputModel
-                {
-                    Id = loginAttempt.Id,
-                    Secret = loginAttempt.Secret
-                });
-
-            if (!user.EmailConfirmed)
-            {
-                _mailService.SendMail(this, model.Email, new NewUserEmailModel
-                {
-                    ConfirmUrl = confirmUrl,
-                    Email = user.Email,
-                });
-            }
-            else
-            {
-                _mailService.SendMail(this, model.Email, new LoginEmailModel
-                {
-                    ConfirmUrl = confirmUrl,
-                    Email = user.Email,
-                });
-            }
-
-            return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
-            {
-                Id = loginAttempt.Id,
-                RememberLogin = model.RememberLogin,
-                ReturnUrl = model.ReturnUrl
-            });
         }
 
         /// <summary>
@@ -364,7 +365,7 @@ namespace Authentication.Api.Controllers
             return View("LoggedOut", vm);
         }
         
-        private LoginAttemptConfirmViewModel BuildLoginAttemptConfirmViewModel(LoginAttempt loginAttempt)
+        private static LoginAttemptConfirmViewModel BuildLoginAttemptConfirmViewModel(LoginAttempt loginAttempt)
         {
             return new()
             {
@@ -404,15 +405,12 @@ namespace Authentication.Api.Controllers
                 if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)
                 {
                     var providerSupportsSignout = await HttpContext.GetSchemeSupportsSignOutAsync(idp);
-                    if (providerSupportsSignout)
+                    if (providerSupportsSignout && vm.LogoutId == null)
                     {
-                        if (vm.LogoutId == null)
-                        {
-                            // if there's no current logout context, we need to create one
-                            // this captures necessary info from the current logged in user
-                            // before we signout and redirect away to the external IdP for signout
-                            vm.LogoutId = await _interaction.CreateLogoutContextAsync();
-                        }
+                        // if there's no current logout context, we need to create one
+                        // this captures necessary info from the current logged in user
+                        // before we signout and redirect away to the external IdP for signout
+                        vm.LogoutId = await _interaction.CreateLogoutContextAsync();
                     }
                 }
             }

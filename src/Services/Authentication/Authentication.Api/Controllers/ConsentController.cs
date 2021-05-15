@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -207,9 +206,9 @@ namespace Authentication.Api.Controllers
             return vm;
         }
 
-        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+        private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
         {
-            return new ScopeViewModel
+            return new()
             {
                 Value = identity.Name,
                 DisplayName = identity.DisplayName ?? identity.Name,
@@ -220,10 +219,10 @@ namespace Authentication.Api.Controllers
             };
         }
 
-        public ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
+        public static ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
         {
             var displayName = apiScope.DisplayName ?? apiScope.Name;
-            if (!String.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
+            if (!string.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
             {
                 displayName += ":" + parsedScopeValue.ParsedParameter;
             }
