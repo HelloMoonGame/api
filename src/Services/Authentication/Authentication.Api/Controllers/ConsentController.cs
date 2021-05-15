@@ -171,7 +171,7 @@ namespace Authentication.Api.Controllers
             return null;
         }
 
-        private ConsentViewModel CreateConsentViewModel(
+        private static ConsentViewModel CreateConsentViewModel(
             ConsentInputModel model, string returnUrl,
             AuthorizationRequest request)
         {
