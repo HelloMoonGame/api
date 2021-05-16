@@ -8,8 +8,6 @@ using Authentication.Api.Domain.Login;
 using Authentication.Api.Infrastructure;
 using Authentication.Api.InputModels;
 using Authentication.Api.Models;
-using Authentication.Api.Models.Email;
-using Authentication.Api.Services;
 using Authentication.Api.ViewModels;
 using Common.Domain.SeedWork;
 using IdentityModel;
@@ -20,7 +18,6 @@ using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Authentication.Api.Controllers
 {
@@ -30,29 +27,23 @@ namespace Authentication.Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IConfiguration _configuration;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
-        private readonly IMailService _mailService;
         private readonly ILoginAttemptRepository _loginAttemptRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration,
             IIdentityServerInteractionService interaction,
             IEventService events,
-            IMailService mailService,
             ILoginAttemptRepository loginAttemptRepository, 
             IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
             _interaction = interaction;
             _events = events;
-            _mailService = mailService;
             _loginAttemptRepository = loginAttemptRepository;
             _unitOfWork = unitOfWork;
         }
@@ -85,31 +76,7 @@ namespace Authentication.Api.Controllers
 
             await CancelLoginAttemptsForUserId(Guid.Parse(user.Id), cancellationToken);
             var loginAttempt = await CreateLoginAttempt(Guid.Parse(user.Id), cancellationToken);
-
-            var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
-                new LoginAttemptConfirmInputModel
-                {
-                    Id = loginAttempt.Id,
-                    Secret = loginAttempt.Secret
-                });
-
-            if (!user.EmailConfirmed)
-            {
-                _mailService.SendMail(this, model.Email, new NewUserEmailModel
-                {
-                    ConfirmUrl = confirmUrl,
-                    Email = user.Email,
-                });
-            }
-            else
-            {
-                _mailService.SendMail(this, model.Email, new LoginEmailModel
-                {
-                    ConfirmUrl = confirmUrl,
-                    Email = user.Email,
-                });
-            }
-
+            
             return RedirectToAction("WaitForLoginApproval", new LoginAttemptInputModel
             {
                 Id = loginAttempt.Id,
@@ -194,7 +161,7 @@ namespace Authentication.Api.Controllers
 
         private async Task<LoginAttempt> CreateLoginAttempt(Guid userId, CancellationToken cancellationToken)
         {
-            var loginAttempt = new LoginAttempt(userId, TimeSpan.FromMinutes(10));
+            var loginAttempt = LoginAttempt.Create(userId, TimeSpan.FromMinutes(10));
             await _loginAttemptRepository.AddAsync(loginAttempt, cancellationToken);
             await _unitOfWork.CommitAsync(cancellationToken);
             return loginAttempt;

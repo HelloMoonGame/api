@@ -101,6 +101,8 @@ namespace Character.Api
             services.AddTransient<ICharacterLocationRepository, CharacterLocationRepository>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+            
+            services.AddSingleton(_ => new DomainNotificationFactory(typeof(Startup)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

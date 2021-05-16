@@ -1,25 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Common.Domain.SeedWork;
 
 namespace Authentication.Api.Domain.Login
 {
-    public class LoginAttempt
+    public class LoginAttempt : Entity
     {
-        public LoginAttempt()
-        {
-            Id = Guid.NewGuid();
-            Secret = Guid.NewGuid().ToString();
-        }
-        
-        public LoginAttempt(Guid userId, TimeSpan duration) : this()
-        {
-            UserId = userId;
-            ExpiryDate = DateTime.UtcNow.Add(duration);
-        }
-
         public Guid Id { get; set; }
         
-        [Required]
         public Guid UserId { get; set; }
 
         [Required]
@@ -28,5 +16,22 @@ namespace Authentication.Api.Domain.Login
         public bool Accepted { get; set; }
         
         public DateTime ExpiryDate { get; set; }
+
+        private LoginAttempt() { }
+
+        private LoginAttempt(Guid userId, TimeSpan duration)
+        {
+            Id = Guid.NewGuid();
+            Secret = Guid.NewGuid().ToString();
+            UserId = userId;
+            ExpiryDate = DateTime.UtcNow.Add(duration);
+
+            AddDomainEvent(new LoginAttemptCreatedEvent(Id, UserId, Secret));
+        }
+        
+        public static LoginAttempt Create(Guid userId, TimeSpan duration)
+        {
+            return new LoginAttempt(userId, duration);
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Authentication.IntegrationTests.Mocks
     {
         public static IList<Mail> MailsSent { get; } = new List<Mail>();
 
-        public void SendMail(Controller controller, string to, EmailModel model)
+        public void SendMail(string to, EmailModel model)
         {
             MailsSent.Add(new Mail { To = to, Model = model });
         }
