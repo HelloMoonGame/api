@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Character.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 
 namespace Character.UnitTests.SeedWork
 {

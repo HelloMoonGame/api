@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Authentication.Api.Data.Migrations
 {
+#pragma warning disable IDE1006 // Naming Styles
     public partial class addloginattempts : Migration
+#pragma warning restore IDE1006 // Naming Styles
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

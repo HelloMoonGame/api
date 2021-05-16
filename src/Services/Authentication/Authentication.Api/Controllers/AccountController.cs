@@ -5,13 +5,13 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Authentication.Api.Domain.Login;
-using Authentication.Api.Domain.SeedWork;
 using Authentication.Api.Infrastructure;
 using Authentication.Api.InputModels;
 using Authentication.Api.Models;
 using Authentication.Api.Models.Email;
 using Authentication.Api.Services;
 using Authentication.Api.ViewModels;
+using Common.Domain.SeedWork;
 using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
@@ -204,7 +204,7 @@ namespace Authentication.Api.Controllers
         /// Wait for approval of the login attempt
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> WaitForLoginApproval(LoginAttemptInputModel model, string button)
+        public async Task<IActionResult> WaitForLoginApproval(LoginAttemptInputModel model)
         {
             if (model == null)
                 return BadRequest();

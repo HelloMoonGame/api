@@ -6,13 +6,13 @@ using Character.Api.Application.Characters.DomainServices;
 using Character.Api.Configuration;
 using Character.Api.Domain.CharacterLocations;
 using Character.Api.Domain.Characters;
-using Character.Api.Domain.SeedWork;
 using Character.Api.GrpcServices;
 using Character.Api.Infrastructure.Database;
 using Character.Api.Infrastructure.Domain;
 using Character.Api.Infrastructure.Domain.CharacterLocations;
 using Character.Api.Infrastructure.Domain.Characters;
-using Character.Api.Infrastructure.Processing;
+using Common.Domain.SeedWork;
+using Common.Infrastructure.Processing;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +38,8 @@ namespace Character.Api
         public void ConfigureServices(IServiceCollection services)
         {
             AddDatabase(services);
+            services.AddScoped<DbContext>(provider => provider.GetService<CharactersContext>());
+            
             AddDependencies(services);
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddJsonOptions(opts =>

@@ -18,7 +18,8 @@ namespace Character.IntegrationTests.SeedWork
             
             services.AddDbContext<CharactersContext>(options =>
                 options.UseSqlite(CreateInMemoryDatabase()));
-            
+            services.AddScoped<DbContext>(provider => provider.GetService<CharactersContext>());
+
             Startup.AddDependencies(services);
             
             services.AddLogging();

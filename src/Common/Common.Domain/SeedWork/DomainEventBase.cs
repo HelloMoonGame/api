@@ -1,7 +1,7 @@
 ﻿using System;
-using Character.Api.Domain.SharedKernel;
+using Common.Domain.SharedKernel;
 
-namespace Character.Api.Domain.SeedWork
+namespace Common.Domain.SeedWork
 {
     public class DomainEventBase : IDomainEvent
     {

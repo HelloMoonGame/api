@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Authentication.Api.Domain.SeedWork
+namespace Common.Domain.SeedWork
 {
     public interface IUnitOfWork
     {

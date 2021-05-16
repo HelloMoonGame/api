@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Character.Api.Domain.CharacterLocations;
-using Character.Api.Domain.SeedWork;
-using Character.Api.Domain.SharedKernel;
+using Common.Domain.SeedWork;
+using Common.Domain.SharedKernel;
 using MediatR;
 
 namespace Character.Api.Application.CharacterLocations.SpawnCharacter

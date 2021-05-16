@@ -1,4 +1,4 @@
-﻿namespace Authentication.Api.Domain.SeedWork
+﻿namespace Common.Domain.SeedWork
 {
     public interface IBusinessRule
     {

@@ -1,12 +1,12 @@
 ﻿using Authentication.Api.Configuration;
 using Authentication.Api.Data;
 using Authentication.Api.Domain.Login;
-using Authentication.Api.Domain.SeedWork;
-using Authentication.Api.Infrastructure.Domain;
 using Authentication.Api.Infrastructure.Domain.Login;
-using Authentication.Api.Infrastructure.Processing;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
+using Common.Domain.SeedWork;
+using Common.Infrastructure.Domain;
+using Common.Infrastructure.Processing;
 using IdentityServer4.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -46,6 +46,7 @@ namespace Authentication.Api
             services.AddControllersWithViews();
 
             AddDatabase(services);
+            services.AddScoped<DbContext>(provider => provider.GetService<ApplicationDbContext>());
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {

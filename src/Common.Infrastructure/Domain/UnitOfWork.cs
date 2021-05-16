@@ -1,18 +1,18 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Authentication.Api.Data;
-using Authentication.Api.Domain.SeedWork;
-using Authentication.Api.Infrastructure.Processing;
+using Common.Domain.SeedWork;
+using Common.Infrastructure.Processing;
+using Microsoft.EntityFrameworkCore;
 
-namespace Authentication.Api.Infrastructure.Domain
+namespace Common.Infrastructure.Domain
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DbContext _context;
         private readonly IDomainEventsDispatcher _domainEventsDispatcher;
 
         public UnitOfWork(
-            ApplicationDbContext context,
+            DbContext context,
             IDomainEventsDispatcher domainEventsDispatcher)
         {
             _context = context;

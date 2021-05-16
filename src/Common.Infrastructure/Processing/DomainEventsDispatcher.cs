@@ -1,18 +1,18 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Authentication.Api.Data;
-using Authentication.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-namespace Authentication.Api.Infrastructure.Processing
+namespace Common.Infrastructure.Processing
 {
     public class DomainEventsDispatcher : IDomainEventsDispatcher
     {
         private readonly IMediator _mediator;
-        private readonly ApplicationDbContext _context;
+        private readonly DbContext _context;
 
-        public DomainEventsDispatcher(IMediator mediator, ApplicationDbContext context)
+        public DomainEventsDispatcher(IMediator mediator, DbContext context)
         {
             _mediator = mediator;
             _context = context;

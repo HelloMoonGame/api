@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Character.Api.Domain.Characters;
-using Character.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 using MediatR;
 
 namespace Character.Api.Application.Characters.CreateCharacter

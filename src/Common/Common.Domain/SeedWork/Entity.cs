@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Character.Api.Domain.SeedWork
+namespace Common.Domain.SeedWork
 {
     /// <summary>
     /// Base class for entities.

@@ -5,7 +5,7 @@ using Character.Api.Application.Characters;
 using Character.Api.Application.Characters.CreateCharacter;
 using Character.Api.Application.Characters.GetUserCharacter;
 using Character.Api.Domain.Characters.Rules;
-using Character.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

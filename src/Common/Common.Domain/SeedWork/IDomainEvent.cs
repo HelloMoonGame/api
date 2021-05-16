@@ -1,7 +1,7 @@
-﻿using System;
-using MediatR;
+﻿using MediatR;
+using System;
 
-namespace Authentication.Api.Domain.SeedWork
+namespace Common.Domain.SeedWork
 {
     public interface IDomainEvent : INotification
     {

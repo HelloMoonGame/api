@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Character.Api.Infrastructure.Processing
+namespace Common.Infrastructure.Processing
 {
     public interface IDomainEventsDispatcher
     {
