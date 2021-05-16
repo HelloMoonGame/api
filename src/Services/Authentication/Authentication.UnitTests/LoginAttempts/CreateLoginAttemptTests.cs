@@ -1,5 +1,5 @@
 ﻿using System;
-using Authentication.Api.Models;
+using Authentication.Api.Domain.Login;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Authentication.UnitTests.LoginAttempts
@@ -10,8 +10,9 @@ namespace Authentication.UnitTests.LoginAttempts
         [TestMethod]
         public void Each_login_attempt_gets_a_unique_id_and_secret()
         {
-            var loginAttempt1 = new LoginAttempt("user1", TimeSpan.FromHours(1));
-            var loginAttempt2 = new LoginAttempt("user1", TimeSpan.FromHours(1));
+            var userId = Guid.NewGuid();
+            var loginAttempt1 = new LoginAttempt(userId, TimeSpan.FromHours(1));
+            var loginAttempt2 = new LoginAttempt(userId, TimeSpan.FromHours(1));
             
             Assert.AreEqual(loginAttempt1.UserId, loginAttempt2.UserId);
             Assert.AreNotEqual(loginAttempt1.Id, loginAttempt2.Id);

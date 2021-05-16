@@ -1,4 +1,5 @@
-﻿using Authentication.Api.Models;
+﻿using Authentication.Api.Domain.Login;
+using Authentication.Api.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,8 +1,14 @@
 ﻿using Authentication.Api.Configuration;
 using Authentication.Api.Data;
+using Authentication.Api.Domain.Login;
+using Authentication.Api.Domain.SeedWork;
+using Authentication.Api.Infrastructure.Domain;
+using Authentication.Api.Infrastructure.Domain.Login;
+using Authentication.Api.Infrastructure.Processing;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
 using IdentityServer4.Services;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +33,8 @@ namespace Authentication.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMediatR(typeof(Startup));
+            
             services.AddSingleton<ICorsPolicyService>(container => {
                 var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
                 return new DefaultCorsPolicyService(logger)
@@ -69,7 +77,10 @@ namespace Authentication.Api
             
             services.AddTransient(_ => mailConfig);
             services.AddTransient<IMailService, MailService>();
-            
+            services.AddTransient<ILoginAttemptRepository, LoginAttemptRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+
             services.AddDatabaseDeveloperPageExceptionFilter();
         }
 

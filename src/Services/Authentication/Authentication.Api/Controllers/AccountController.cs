@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Security.Authentication;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
-using Authentication.Api.Data;
+using Authentication.Api.Domain.Login;
+using Authentication.Api.Domain.SeedWork;
 using Authentication.Api.Infrastructure;
 using Authentication.Api.InputModels;
 using Authentication.Api.Models;
@@ -18,7 +20,6 @@ using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Authentication.Api.Controllers
@@ -29,28 +30,31 @@ namespace Authentication.Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
         private readonly IMailService _mailService;
+        private readonly ILoginAttemptRepository _loginAttemptRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ApplicationDbContext dbContext,
             IConfiguration configuration,
             IIdentityServerInteractionService interaction,
             IEventService events,
-            IMailService mailService)
+            IMailService mailService,
+            ILoginAttemptRepository loginAttemptRepository, 
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _dbContext = dbContext;
             _configuration = configuration;
             _interaction = interaction;
             _events = events;
             _mailService = mailService;
+            _loginAttemptRepository = loginAttemptRepository;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -69,21 +73,18 @@ namespace Authentication.Api.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginInputModel model, string button)
+        public async Task<IActionResult> Login(LoginInputModel model, string button, CancellationToken cancellationToken)
         {
-            // check if we are in the context of an authorization request
-            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
             // the user clicked the "cancel" button
             if (button != "login")
             {
-                return await CancelLogin(context, model.ReturnUrl);
+                return await CancelLogin(model.ReturnUrl); 
             }
 
             var user = await _userManager.FindByEmailAsync(model.Email) ?? await CreateUser(model.Email);
 
-            await CancelLoginAttemptsForUserId(user.Id);
-            var loginAttempt = await CreateLoginAttempt(user.Id);
+            await CancelLoginAttemptsForUserId(Guid.Parse(user.Id), cancellationToken);
+            var loginAttempt = await CreateLoginAttempt(Guid.Parse(user.Id), cancellationToken);
 
             var confirmUrl = _configuration["AuthenticationApiUrl"] + Url.Action(nameof(ConfirmLogin),
                 new LoginAttemptConfirmInputModel
@@ -146,22 +147,17 @@ namespace Authentication.Api.Controllers
             throw new AuthenticationException("invalid return URL");
         }
 
-        private async Task<IActionResult> CancelLogin(AuthorizationRequest context, string returnUrl)
+        private async Task<IActionResult> CancelLogin(string returnUrl)
         {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
             if (context != null)
             {
-                // if the user cancels, send a result back into IdentityServer as if they 
-                // denied the consent (even if this client does not require consent).
-                // this will send back an access denied OIDC error response to the client.
                 await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
-
                 return RedirectToReturnUrl(context, returnUrl);
             }
-            else
-            {
-                // since we don't have a valid context, then we just go back to the home page
-                return Redirect("/");
-            }
+            
+            return Redirect("/");
         }
 
         private async Task<ApplicationUser> CreateUser(string email)
@@ -189,28 +185,18 @@ namespace Authentication.Api.Controllers
             return user;
         }
 
-        private async Task DeleteLoginAttempt(LoginAttempt loginAttempt)
+        private async Task CancelLoginAttemptsForUserId(Guid userId, CancellationToken cancellationToken)
         {
-            _dbContext.LoginAttempts.Remove(loginAttempt);
-            await _dbContext.SaveChangesAsync();
+            var loginAttempts = (await _loginAttemptRepository.GetAllByUserIdAsync(userId, cancellationToken)).ToList();
+            loginAttempts.ForEach(l => _loginAttemptRepository.Delete(l));
+            await _unitOfWork.CommitAsync(cancellationToken);
         }
 
-        private async Task CancelLoginAttemptsForUserId(string userId)
-        {
-            var loginAttempts = await _dbContext.LoginAttempts.Where(l => l.UserId == userId).ToListAsync();
-            if (loginAttempts.Any())
-            {
-                loginAttempts.ForEach(l => _dbContext.Remove(l));
-                await _dbContext.SaveChangesAsync();
-            }
-        }
-
-        private async Task<LoginAttempt> CreateLoginAttempt(string userId)
+        private async Task<LoginAttempt> CreateLoginAttempt(Guid userId, CancellationToken cancellationToken)
         {
             var loginAttempt = new LoginAttempt(userId, TimeSpan.FromMinutes(10));
-            await _dbContext.LoginAttempts.AddAsync(loginAttempt);
-            await _dbContext.SaveChangesAsync();
-
+            await _loginAttemptRepository.AddAsync(loginAttempt, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
             return loginAttempt;
         }
 
@@ -222,18 +208,11 @@ namespace Authentication.Api.Controllers
         {
             if (model == null)
                 return BadRequest();
-
-            // check if we are in the context of an authorization request
-            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
-            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            
+            var loginAttempt = await _loginAttemptRepository.GetByIdAsync(model.Id);
             if (loginAttempt == null)
-                return await CancelLogin(context, model.ReturnUrl);
-
-            var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
-            if (user == null)
-                return await CancelLogin(context, model.ReturnUrl);
-
+                return await CancelLogin(model.ReturnUrl);
+            
             return View("WaitForLoginApproval", new LoginAttemptViewModel
             {
                 ReturnUrl = model.ReturnUrl,
@@ -247,14 +226,14 @@ namespace Authentication.Api.Controllers
         /// Check if login is already approved
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CheckLoginApproval(LoginAttemptInputModel model)
+        public async Task<IActionResult> CheckLoginApproval(LoginAttemptInputModel model, CancellationToken cancellationToken)
         {
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
             var returnUrl = context != null ? model.ReturnUrl : GetLocalReturnUrl(model.ReturnUrl);
 
             // validate login attempt
-            var loginAttempt = await _dbContext.LoginAttempts.FindAsync(model.Id);
+            var loginAttempt = await _loginAttemptRepository.GetByIdAsync(model.Id, cancellationToken);
             if (loginAttempt == null || DateTime.UtcNow > loginAttempt.ExpiryDate)
             {
                 if (context != null) await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
@@ -269,12 +248,13 @@ namespace Authentication.Api.Controllers
             // if login attempt is accepted, forward to returnUrl
             if (loginAttempt.Accepted)
             {
-                var user = await _userManager.FindByIdAsync(loginAttempt.UserId);
+                var user = await _userManager.FindByIdAsync(loginAttempt.UserId.ToString());
                 await _signInManager.SignInAsync(user, model.RememberLogin, "email");
                 await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.UserName,
                     clientId: context?.Client.ClientId));
 
-                await DeleteLoginAttempt(loginAttempt);
+                _loginAttemptRepository.Delete(loginAttempt);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 return Json(new
                 {
@@ -296,7 +276,10 @@ namespace Authentication.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ConfirmLogin(LoginAttemptConfirmInputModel model)
         {
-            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            var loginAttempt = await _loginAttemptRepository.GetByIdAsync(model.Id.GetValueOrDefault());
+            if (loginAttempt?.Secret != model.Secret)
+                loginAttempt = null;
+            
             var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
             
             return View(viewModel);
@@ -307,22 +290,26 @@ namespace Authentication.Api.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmLoginFinish(LoginAttemptConfirmInputModel model, string button)
+        public async Task<IActionResult> ConfirmLoginFinish(LoginAttemptConfirmInputModel model, string button, CancellationToken cancellationToken)
         {
-            var loginAttempt = await _dbContext.LoginAttempts.SingleOrDefaultAsync(l => l.Id == model.Id && l.Secret == model.Secret);
+            var loginAttempt = await _loginAttemptRepository.GetByIdAsync(model.Id.GetValueOrDefault(), cancellationToken);
+            if (loginAttempt?.Secret != model.Secret)
+                loginAttempt = null;
+            
             var viewModel = BuildLoginAttemptConfirmViewModel(loginAttempt);
 
             // the user clicked the "cancel" button
             if (button != "yes")
             {
-                await DeleteLoginAttempt(loginAttempt);
+                _loginAttemptRepository.Delete(loginAttempt);
+                await _unitOfWork.CommitAsync(cancellationToken);
             }
             else if (loginAttempt != null && !viewModel.WasAlreadyConfirmed && !viewModel.ExpiredOrNonExisting)
             {
                 loginAttempt.Accepted = true;
-                var user = await _dbContext.Users.SingleAsync(u => u.Id == loginAttempt.UserId);
+                var user = await _userManager.FindByIdAsync(loginAttempt.UserId.ToString());
                 user.EmailConfirmed = true;
-                await _dbContext.SaveChangesAsync();
+                await _userManager.UpdateAsync(user);
                 
                 viewModel.Accepted = true;
             }

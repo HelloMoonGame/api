@@ -1,8 +1,10 @@
-﻿namespace Authentication.Api.InputModels
+﻿using System;
+
+namespace Authentication.Api.InputModels
 {
     public class LoginAttemptConfirmInputModel
     {
-        public string Id { get; set; }
+        public Guid? Id { get; set; }
         public string Secret { get; set; }
     }
 }
