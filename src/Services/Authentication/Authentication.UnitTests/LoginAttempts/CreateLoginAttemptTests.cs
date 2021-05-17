@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Authentication.Api;
 using Authentication.Api.Application.Login.IntegrationHandlers;
 using Authentication.Api.Domain.Login;
-using Common.Application.Configuration.DomainEvents;
 using Common.Domain.SeedWork;
 using Common.Infrastructure.Processing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,6 +50,27 @@ namespace Authentication.UnitTests.LoginAttempts
             Assert.AreEqual(loginAttemptId, loginAttemptStartedNotification.LoginAttemptId);
             Assert.AreEqual(userId, loginAttemptStartedNotification.UserId);
             Assert.AreEqual("test", loginAttemptStartedNotification.Secret);
+        }
+
+        [TestMethod]
+        public void DomainNotificationFactory_should_not_create_Notifications_for_Events_without_Notification()
+        {
+            var userId = Guid.NewGuid();
+            var loginAttemptId = Guid.NewGuid();
+            var domainEvent = new LoginAttemptCreatedEvent(loginAttemptId, userId, "test");
+            var domainEvent2 = new LoginAttemptApprovedEvent(userId);
+            var domainNotificationFactory = new DomainNotificationFactory(typeof(Startup));
+
+            var domainEvents = new List<IDomainEvent>
+            {
+                domainEvent, domainEvent2
+            };
+            var domainEventNotifications = domainEvents
+                .Select(domainNotificationFactory.CreateNotification)
+                .Where(notification => notification != null)
+                .ToList();
+            
+            Assert.AreEqual(1, domainEventNotifications.Count);
         }
     }
 }

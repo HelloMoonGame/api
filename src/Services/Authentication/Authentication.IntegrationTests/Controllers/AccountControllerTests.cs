@@ -37,6 +37,23 @@ namespace Authentication.IntegrationTests.Controllers
         }
 
         [TestMethod]
+        public async Task Login_mail_is_sent_if_user_logins_after_successful_login()
+        {
+            // Arrange
+            await LoginUserToGame("test@test.com");
+            await LogoutUser();
+            
+            // Act
+            await Client.StartLoginAttemptToGame("test@test.com");
+
+            // Assert
+            Assert.AreEqual(2, MailServiceMock.MailsSent.Count);
+            Assert.AreEqual("test@test.com", MailServiceMock.MailsSent[1].To);
+            Assert.IsInstanceOfType(MailServiceMock.MailsSent[0].Model, typeof(NewUserEmailModel));
+            Assert.IsInstanceOfType(MailServiceMock.MailsSent[1].Model, typeof(LoginEmailModel));
+        }
+
+        [TestMethod]
         public async Task Timer_is_shown_if_user_tries_to_login()
         {
             // Act
@@ -92,6 +109,7 @@ namespace Authentication.IntegrationTests.Controllers
 
             // Assert
             Assert.AreEqual(LoginHelpers.LoginAttemptStatus.ExpiredOrRejected, checkResult.Status);
+            Assert.AreEqual(HttpStatusCode.NotFound, returnResult.StatusCode);
             Assert.IsTrue(returnResult.RequestMessage?.RequestUri?.ToString().StartsWith("http://localhost:3000") ?? false, $"User is forwarded to {returnResult.RequestMessage?.RequestUri}, while it was expected to go to http://localhost:3000");
             Assert.IsTrue(returnResult.RequestMessage.RequestUri.ToString().Contains("error=access_denied"), $"User is forwarded to {returnResult.RequestMessage.RequestUri}, while the url should contain 'error=access_denied'.");
         }
@@ -130,15 +148,21 @@ namespace Authentication.IntegrationTests.Controllers
             await LoginUserToGame("test@test.com");
 
             // Act
-            var logoutResponse = await Client.GetAsync("/Account/Logout");
-            var logoutPage = await logoutResponse.GetDocumentAsync();
-            var loggedOutResponse = await Client.SendAsync(logoutPage.Forms["logout"], 
-                (IHtmlElement)logoutPage.Forms["logout"].QuerySelector("button"));
-            var loggedOutPage = await loggedOutResponse.GetDocumentAsync();
-            
+            var loggedOutPage = await LogoutUser();
+
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, loggedOutPage.StatusCode);
             Assert.IsNotNull(loggedOutPage.GetElementsByClassName("logged-out-page"));
+        }
+
+        private async Task<IHtmlDocument> LogoutUser()
+        {
+            var logoutResponse = await Client.GetAsync("/Account/Logout");
+            var logoutPage = await logoutResponse.GetDocumentAsync();
+            var loggedOutResponse = await Client.SendAsync(logoutPage.Forms["logout"],
+                (IHtmlElement) logoutPage.Forms["logout"].QuerySelector("button"));
+            var loggedOutPage = await loggedOutResponse.GetDocumentAsync();
+            return loggedOutPage;
         }
 
         private async Task LoginUserToGame(string email)

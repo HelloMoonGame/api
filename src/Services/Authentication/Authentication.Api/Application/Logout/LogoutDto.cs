@@ -1,6 +1,6 @@
-namespace Authentication.Api.ViewModels
+﻿namespace Authentication.Api.Application.Logout
 {
-    public class LoggedOutViewModel
+    public class LogoutDto
     {
         public string PostLogoutRedirectUri { get; set; }
         public string ClientName { get; set; }

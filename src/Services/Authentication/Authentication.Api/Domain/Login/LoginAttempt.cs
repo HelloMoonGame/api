@@ -1,21 +1,20 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using Common.Domain.SeedWork;
+using Common.Domain.SharedKernel;
 
 namespace Authentication.Api.Domain.Login
 {
     public class LoginAttempt : Entity
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; }
         
-        public Guid UserId { get; set; }
-
-        [Required]
-        public string Secret { get; set; }
+        public Guid UserId { get; }
         
-        public bool Accepted { get; set; }
+        public string Secret { get; }
         
-        public DateTime ExpiryDate { get; set; }
+        public bool Accepted { get; private set; }
+        
+        public DateTime ExpiryDate { get; }
 
         private LoginAttempt() { }
 
@@ -32,6 +31,16 @@ namespace Authentication.Api.Domain.Login
         public static LoginAttempt Create(Guid userId, TimeSpan duration)
         {
             return new LoginAttempt(userId, duration);
+        }
+
+        public bool Approve()
+        {
+            if (Accepted || ExpiryDate <= SystemClock.Now) 
+                return false;
+            
+            Accepted = true;
+            AddDomainEvent(new LoginAttemptApprovedEvent(UserId));
+            return true;
         }
     }
 }

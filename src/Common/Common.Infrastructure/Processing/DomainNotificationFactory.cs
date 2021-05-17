@@ -28,8 +28,9 @@ namespace Common.Infrastructure.Processing
 
         public IDomainEventNotification<T> CreateNotification<T>(T domainEvent) where T : IDomainEvent
         {
+            var genericType = typeof(IDomainEventNotification<>).MakeGenericType(domainEvent.GetType());
             var notificationType = _notificationTypes
-                .SingleOrDefault(type => typeof(IDomainEventNotification<T>).IsAssignableFrom(type));
+                .SingleOrDefault(type => genericType.IsAssignableFrom(type));
             
             if (notificationType == null)
                 return null;
