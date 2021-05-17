@@ -89,27 +89,6 @@
             Sex describes the biological attributes of the character
             </summary>
         </member>
-        <member name="T:Character.Api.Domain.SeedWork.Entity">
-            <summary>
-            Base class for entities.
-            </summary>
-        </member>
-        <member name="P:Character.Api.Domain.SeedWork.Entity.DomainEvents">
-            <summary>
-            Domain events occurred.
-            </summary>
-        </member>
-        <member name="M:Character.Api.Domain.SeedWork.Entity.AddDomainEvent(Character.Api.Domain.SeedWork.IDomainEvent)">
-            <summary>
-            Add domain event.
-            </summary>
-            <param name="domainEvent"></param>
-        </member>
-        <member name="M:Character.Api.Domain.SeedWork.Entity.ClearDomainEvents">
-            <summary>
-            Clear domain events.
-            </summary>
-        </member>
         <member name="T:CharacterApi.LocationReflection">
             <summary>Holder for reflection information generated from Protos/location.proto</summary>
         </member>

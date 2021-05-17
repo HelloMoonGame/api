@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Character.Api.Domain.Characters.Rules;
-using Character.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 
 namespace Character.Api.Domain.Characters
 {

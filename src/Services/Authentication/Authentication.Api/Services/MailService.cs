@@ -2,52 +2,69 @@
 using System.IO;
 using System.Threading.Tasks;
 using Authentication.Api.Configuration;
+using Authentication.Api.Controllers;
 using Authentication.Api.Models.Email;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
 using MimeKit;
 
 namespace Authentication.Api.Services
 {
     public interface IMailService
     {
-        public void SendMail(Controller controller, string to, EmailModel model);
+        public void SendMail(string to, EmailModel model);
     }
 
     public class MailService : IMailService
     {
         private readonly MailConfig _config;
+        private readonly ICompositeViewEngine _viewEngine;
+        private readonly ITempDataProvider _tempDataProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        public MailService(MailConfig config)
+        public MailService(MailConfig config, ICompositeViewEngine viewEngine, 
+            ITempDataProvider tempDataProvider, IServiceProvider serviceProvider)
         {
             _config = config;
+            _viewEngine = viewEngine;
+            _tempDataProvider = tempDataProvider;
+            _serviceProvider = serviceProvider;
         }
         
-        public async void SendMail(Controller controller, string to, EmailModel model)
+        public async void SendMail(string to, EmailModel model)
         {
-            var viewEngine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
-            var view = viewEngine?.FindView(controller.ControllerContext, "Email/" + model.ViewName, true);
-            if (view == null)
+            var context = GetActionContext();
+            var viewEngineResult = _viewEngine.FindView(context, "Email/" + model.ViewName, false);
+            if (viewEngineResult == null || !viewEngineResult.Success)
                 throw new FileNotFoundException("No mail template found for " + model.ViewName);
             
-            controller.ViewData.Model = model;
             string content;
 
             await using (var writer = new StringWriter())
             {
                 var viewContext = new ViewContext(
-                    controller.ControllerContext,
-                    view.View,
-                    controller.ViewData,
-                    controller.TempData,
+                    context,
+                    viewEngineResult.View,
+                    new ViewDataDictionary(
+                        new EmptyModelMetadataProvider(),
+                        new ModelStateDictionary())
+                    {
+                        Model = model
+                    },
+                    new TempDataDictionary(
+                        context.HttpContext,
+                        _tempDataProvider),
                     writer,
-                    new HtmlHelperOptions()
-                );
+                    new HtmlHelperOptions());
 
-                await view.View.RenderAsync(viewContext);
+                await viewEngineResult.View.RenderAsync(viewContext);
 
                 content = writer.GetStringBuilder().ToString();
             }
@@ -64,13 +81,13 @@ namespace Authentication.Api.Services
 
         private Task DeliverMail(DeliveryMethod configDeliveryMethod, MimeMessage message)
         {
-            switch (configDeliveryMethod)
+            return configDeliveryMethod switch
             {
-                case DeliveryMethod.SpecifiedPickupDirectory: return SaveToPickupDirectory(message);
-                case DeliveryMethod.Network: return SendViaNetwork(message);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(configDeliveryMethod), "Unsupported delivery method, only SpecifiedPickupDirectory or Network are allowed");
-            }
+                DeliveryMethod.SpecifiedPickupDirectory => SaveToPickupDirectory(message),
+                DeliveryMethod.Network => SendViaNetwork(message),
+                _ => throw new ArgumentOutOfRangeException(nameof(configDeliveryMethod),
+                    "Unsupported delivery method, only SpecifiedPickupDirectory or Network are allowed")
+            };
         }
 
         private async Task SaveToPickupDirectory(MimeMessage message)
@@ -89,6 +106,16 @@ namespace Authentication.Api.Services
                 await client.AuthenticateAsync(_config.SmtpUserName, _config.SmtpPassword);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
+        }
+
+        private ActionContext GetActionContext()
+        {
+            var httpContext = new DefaultHttpContext
+            {
+                RequestServices = _serviceProvider
+            };
+
+            return new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
         }
     }
 }

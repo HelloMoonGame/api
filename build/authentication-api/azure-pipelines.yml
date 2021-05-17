@@ -10,6 +10,7 @@ trigger:
     - deploy/authentication-db.yaml
     - deploy/authentication-api.yaml
     - src/Services/Authentication/*
+    - src/Common/*
 
 resources:
 - repo: self

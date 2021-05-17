@@ -1,5 +1,5 @@
 ﻿using System;
-using Character.Api.Domain.SeedWork;
+using Common.Domain.SeedWork;
 
 namespace Character.Api.Domain.CharacterLocations.Rules
 {

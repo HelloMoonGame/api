@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Character.Api.Domain.SeedWork;
 using Character.Api.Infrastructure.Database;
-using Character.Api.Infrastructure.Processing;
+using Common.Domain.SeedWork;
+using Common.Infrastructure.Processing;
 
 namespace Character.Api.Infrastructure.Domain
 {

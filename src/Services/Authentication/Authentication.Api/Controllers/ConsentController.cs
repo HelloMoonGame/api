@@ -68,9 +68,8 @@ namespace Authentication.Api.Controllers
                 var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
                 if (context?.IsNativeClient() == true)
                 {
-                    // The client is native, so this change in how to
-                    // return the response is for better UX for the end user.
-                    return this.LoadingPage("Redirect", result.RedirectUri);
+                    // For native clients it is better to show a nice text and redirect with Javascript
+                    return View("Redirect", new RedirectViewModel { RedirectUrl = result.RedirectUri });
                 }
 
                 return Redirect(result.RedirectUri);
