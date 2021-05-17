@@ -90,7 +90,7 @@ namespace Authentication.Api
         protected virtual void AddDatabase(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(System.Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
         }
 
         public void Configure(IApplicationBuilder app)
