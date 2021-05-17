@@ -1,8 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Authentication.Api.Domain.Login;
 using Authentication.Api.Models;
-using Common.Domain.SeedWork;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
 using MediatR;
@@ -12,15 +10,13 @@ namespace Authentication.Api.Application.Logout.DoLogout
 {
     public class DoLogoutCommandHandler : IRequestHandler<DoLogoutCommand, LogoutDto>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEventService _events;
         private readonly IIdentityServerInteractionService _interaction;
 
-        public DoLogoutCommandHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
+        public DoLogoutCommandHandler(SignInManager<ApplicationUser> signInManager, 
             IEventService events, IIdentityServerInteractionService interaction)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
             _events = events;
             _interaction = interaction;
