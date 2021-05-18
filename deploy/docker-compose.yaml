@@ -43,3 +43,30 @@ services:
       AuthenticationApiUrl: https://authentication-api:443
       Logging__LogLevel__Microsoft: Debug
     labels:
+      - traefik.enable=true
+      - traefik.http.routers.character.rule=PathPrefix(`/character`)
+      - traefik.http.middlewares.strip-character-prefix.stripprefix.prefixes=/character
+      - traefik.http.middlewares.strip-character-prefix.stripprefix.forceSlash=false
+      - traefik.http.routers.character.entrypoints=websecure
+      - traefik.http.routers.character.tls=true
+      - traefik.http.routers.character.middlewares=strip-character-prefix@docker
+      - traefik.http.routers.character.service=character
+      - traefik.http.services.character.loadbalancer.server.port=443
+      - traefik.http.services.character.loadbalancer.server.scheme=https
+
+  traefik:
+    image: traefik
+    restart: always
+    ports:
+      - "4080:4080"
+      - "4880:8080"
+      - "4443:4443"
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.Address=:4080
+      - --entrypoints.websecure.Address=:4443
+      - --providers.docker.exposedbydefault=false
+      - --serverstransport.insecureskipverify=true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
