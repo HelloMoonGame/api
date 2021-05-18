@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  authentication-db:
+  db:
     image: postgres
     restart: always
     ports:
@@ -18,8 +18,13 @@ services:
     ports:
       - 5000:443
     environment:
-      ConnectionStrings__DefaultConnection: Host=authentication-db;Username=postgres;Password=this_is_a_public_password;Database=authdb
+      ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=authdb
+      Mail__PickupDirectoryLocation: /tmp/maildump
+      AuthenticationApiUrl: https://localhost:5000
+      CharacterApiUrl: https://localhost:4443/character
       GameUrl: http://localhost:3000
+    volumes:
+      - "./maildump:/tmp/maildump"
 
   adminer:
     image: adminer
@@ -27,7 +32,7 @@ services:
     ports:
       - 3100:8080
     environment:
-      ADMINER_DEFAULT_SERVER: authentication-db
+      ADMINER_DEFAULT_SERVER: db
       ADMINER_DESIGN: nette
       ADMINER_PLUGINS: tables-filter tinymce
 
@@ -39,4 +44,34 @@ services:
     ports:
       - 5001:443
     environment:
+      ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=charactersdb
       AuthenticationApiUrl: https://localhost:5000
+      Logging__LogLevel__Microsoft: Debug
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.character.rule=PathPrefix(`/character`)
+      - traefik.http.middlewares.strip-character-prefix.stripprefix.prefixes=/character
+      - traefik.http.middlewares.strip-character-prefix.stripprefix.forceSlash=false
+      - traefik.http.routers.character.entrypoints=websecure
+      - traefik.http.routers.character.tls=true
+      - traefik.http.routers.character.middlewares=strip-character-prefix@docker
+      - traefik.http.routers.character.service=character
+      - traefik.http.services.character.loadbalancer.server.port=443
+      - traefik.http.services.character.loadbalancer.server.scheme=https
+
+  traefik:
+    image: traefik
+    restart: always
+    ports:
+      - "4080:4080"
+      - "4880:8080"
+      - "4443:4443"
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.Address=:4080
+      - --entrypoints.websecure.Address=:4443
+      - --providers.docker.exposedbydefault=false
+      - --serverstransport.insecureskipverify=true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"

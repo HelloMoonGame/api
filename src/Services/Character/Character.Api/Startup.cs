@@ -47,7 +47,7 @@ namespace Character.Api
                 opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddGrpc();
-            services.AddSwaggerDocumentation();
+            services.AddSwaggerDocumentation(Configuration["AuthenticationApiUrl"]);
 
             services.AddCors(o =>
             {
