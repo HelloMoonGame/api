@@ -19,9 +19,12 @@ services:
       - 5000:443
     environment:
       ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=authdb
+      Mail__PickupDirectoryLocation: /tmp/maildump
       AuthenticationApiUrl: https://localhost:5000
       CharacterApiUrl: https://localhost:4443/character
       GameUrl: http://localhost:3000
+    volumes:
+      - "./maildump:/tmp/maildump"
 
   adminer:
     image: adminer
