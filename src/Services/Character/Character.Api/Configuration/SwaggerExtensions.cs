@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Microsoft.OpenApi.Models;
 
 namespace Character.Api.Configuration
@@ -71,12 +72,22 @@ namespace Character.Api.Configuration
 
         internal static IApplicationBuilder UseSwaggerDocumentation(this IApplicationBuilder app)
         {
-            app.UseSwagger();
+            app.UseSwagger(c =>
+            {
+                c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+                {
+                    if (httpReq.Headers.TryGetValue("X-Forwarded-Prefix", out StringValues values)
+                        && values.Count > 0)
+                    {
+                        swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{values[0]}" } };
+                    }
+                });
+            });
 
             app.UseSwaggerUI(c =>
             {
                 c.DocumentTitle = "Character API - Hello Moon";
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Character API");
+                c.SwaggerEndpoint("v1/swagger.json", "Character API");
             });
 
             return app;
