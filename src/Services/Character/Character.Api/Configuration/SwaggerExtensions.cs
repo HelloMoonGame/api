@@ -12,7 +12,7 @@ namespace Character.Api.Configuration
 {
     internal static class SwaggerExtensions
     {
-        internal static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
+        internal static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services, string authenticationApiUrl)
         {
             services.AddSwaggerGen(options =>
             {
@@ -29,15 +29,20 @@ namespace Character.Api.Configuration
                     }
                 });
 
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                options.AddSecurityDefinition("OpenID Connect", new OpenApiSecurityScheme
                 {
-                    Description = @"JWT Authorization header using the Bearer scheme.<br /><br />
-                      Enter 'Bearer' [space] and then your token in the text input below.<br />
-                      <em>Example: 'Bearer eyJhbGciOiJSUz...'</em><br /><br />",
-                    Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
+                    Scheme = "Bearer",
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(authenticationApiUrl + "/connect/authorize"),
+                            TokenUrl = new Uri(authenticationApiUrl + "/connect/token"),
+                            Scopes = new Dictionary<string, string> { { "characterapi", "Character API" } }
+                        }
+                    }
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement()
@@ -48,17 +53,14 @@ namespace Character.Api.Configuration
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
+                                Id = "OpenID Connect"
+                            }
 
                         },
                         new List<string>()
                     }
                 });
-                
+
                 options.CustomSchemaIds(type => Regex.Replace(type.Name, "Dto$", ""));
 
                 var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -88,6 +90,9 @@ namespace Character.Api.Configuration
             {
                 c.DocumentTitle = "Character API - Hello Moon";
                 c.SwaggerEndpoint("v1/swagger.json", "Character API");
+                c.OAuthClientId("docs");
+                c.OAuthClientSecret("5b7f084b-9eb4-4f0b-a833-e6a32b9a51bd");
+                c.OAuthUsePkce();
             });
 
             return app;
