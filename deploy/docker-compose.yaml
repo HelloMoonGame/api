@@ -19,6 +19,8 @@ services:
       - 5000:443
     environment:
       ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=authdb
+      AuthenticationApiUrl: https://localhost:5000
+      CharacterApiUrl: https://localhost:4443/character
       GameUrl: http://localhost:3000
 
   adminer:
@@ -40,7 +42,7 @@ services:
       - 5001:443
     environment:
       ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=charactersdb
-      AuthenticationApiUrl: https://authentication-api:443
+      AuthenticationApiUrl: https://localhost:5000
       Logging__LogLevel__Microsoft: Debug
     labels:
       - traefik.enable=true

@@ -74,6 +74,8 @@ spec:
                   key: password
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
+            - name: CharacterApiUrl
+              value: "https://api.hellomoon.nl/character"
             - name: GameUrl
               value: "https://game.hellomoon.nl"
 

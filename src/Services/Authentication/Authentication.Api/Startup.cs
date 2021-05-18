@@ -67,7 +67,7 @@ namespace Authentication.Api
             })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryClients(Config.Clients(Configuration["GameUrl"]))
+                .AddInMemoryClients(Config.Clients(Configuration["GameUrl"], Configuration["CharacterApiUrl"]))
                 .AddAspNetIdentity<ApplicationUser>();
             
             builder.AddDeveloperSigningCredential();

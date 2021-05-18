@@ -32,7 +32,7 @@ namespace Authentication.Api
             }
         }
 
-        public static IEnumerable<Client> Clients(string gameUrl) =>
+        public static IEnumerable<Client> Clients(string gameUrl, string characterApiUrl) =>
             new []
             {
                 new Client
@@ -59,8 +59,7 @@ namespace Authentication.Api
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
 
-                    RedirectUris = { "https://docs.hellomoon.nl/auth/signin-callback", 
-                        "https://docs.hellomoon.nl/auth/renew-callback" },
+                    RedirectUris = { characterApiUrl + "/swagger/oauth2-redirect.html" },
 
                     AllowedScopes = AllScopes,
 
