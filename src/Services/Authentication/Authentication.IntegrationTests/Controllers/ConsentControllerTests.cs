@@ -41,7 +41,7 @@ namespace Authentication.IntegrationTests.Controllers
             var allowConsentResult = await Client.SendAsync(form, form.QuerySelector("button[value='yes']") as IHtmlElement);
 
             // Assert
-            Assert.IsTrue(allowConsentResult.RequestMessage?.RequestUri?.ToString().StartsWith("https://docs.hellomoon.nl") ?? false, $"User is forwarded to {allowConsentResult.RequestMessage?.RequestUri}, while it was expected to go to https://docs.hellomoon.nl");
+            Assert.IsTrue(allowConsentResult.RequestMessage?.RequestUri?.ToString().StartsWith("https://localhost:5001") ?? false, $"User is forwarded to {allowConsentResult.RequestMessage?.RequestUri}, while it was expected to go to https://localhost:5001");
             Assert.IsFalse(allowConsentResult.RequestMessage.RequestUri.ToString().Contains("error=access_denied"), $"User is forwarded to {allowConsentResult.RequestMessage.RequestUri}, while the url should not contain 'error=access_denied'.");
         }
 
@@ -58,7 +58,7 @@ namespace Authentication.IntegrationTests.Controllers
             var allowConsentResult = await Client.SendAsync(form, form.QuerySelector("button[value='no']") as IHtmlElement);
 
             // Assert
-            Assert.IsTrue(allowConsentResult.RequestMessage?.RequestUri?.ToString().StartsWith("https://docs.hellomoon.nl") ?? false, $"User is forwarded to {allowConsentResult.RequestMessage?.RequestUri}, while it was expected to go to https://docs.hellomoon.nl");
+            Assert.IsTrue(allowConsentResult.RequestMessage?.RequestUri?.ToString().StartsWith("https://localhost:5001") ?? false, $"User is forwarded to {allowConsentResult.RequestMessage?.RequestUri}, while it was expected to go to https://localhost:5001");
             Assert.IsTrue(allowConsentResult.RequestMessage.RequestUri.ToString().Contains("error=access_denied"), $"User is forwarded to {allowConsentResult.RequestMessage.RequestUri}, while the url should contain 'error=access_denied'.");
         }
 

@@ -47,7 +47,7 @@ namespace Authentication.IntegrationTests.Helpers
 
         public static Task<IHtmlDocument> StartLoginAttemptToDocs(this HttpClient client, string email)
         {
-            return StartLoginAttempt(client, "docs", "https://docs.hellomoon.nl/auth/signin-callback", email);
+            return StartLoginAttempt(client, "docs", "https://localhost:5001/swagger/oauth2-redirect.html", email);
         }
         
         public static async Task<IHtmlDocument> GetLoginPage(this HttpClient client, string clientId, string redirectUri)
