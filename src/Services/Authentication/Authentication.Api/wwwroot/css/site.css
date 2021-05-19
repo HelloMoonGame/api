@@ -1,24 +1,108 @@
-.body-container {
-  margin-top: 60px;
-  padding-bottom: 40px; }
+:root {
+    --mdc-theme-primary: #000;
+}
 
-.welcome-page li {
-  list-style: none;
-  padding: 4px; }
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active
+{
+    -webkit-box-shadow: 0 0 0 30px #fff inset !important;
+}
+
+.body-container {
+    margin-top: 60px;
+    padding-bottom:40px;
+}
 
 .logged-out-page iframe {
-  display: none;
-  width: 0;
-  height: 0; }
+    display: none;
+    width: 0;
+    height: 0;
+}
 
 .grants-page .card {
-  margin-top: 20px;
-  border-bottom: 1px solid lightgray; }
-  .grants-page .card .card-title {
+    margin-top: 20px;
+    border-bottom: 1px solid lightgray;
+}
+
+.grants-page .card .card-title {
     font-size: 120%;
-    font-weight: bold; }
-    .grants-page .card .card-title img {
-      width: 100px;
-      height: 100px; }
-  .grants-page .card label {
-    font-weight: bold; }
+    font-weight: bold;
+}
+
+.grants-page .card .card-title img {
+    width: 100px;
+    height: 100px;
+}
+
+.grants-page .card label {
+    font-weight: bold;
+}
+
+body.material {
+    padding: 0;
+    margin: 0;
+    min-width: 320px;
+}
+
+.login-page {
+    padding: 0;
+}
+
+.login-page .mdc-layout-grid__inner {
+    grid-gap: 0;
+    height: 100vh;
+}
+
+.login-image {
+    background-size: cover;
+    background-color: #fafafa;
+    background-image: url(/img/background.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+@media (max-width: 599px) {
+    .login-image { display: none; }
+}
+
+.login-paper {
+    margin: 0 32px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.login-paper form {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.login-paper form .mdc-text-field {
+    width: 100%;
+}
+
+.mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid) .mdc-floating-label {
+     color: #000;
+ }
+
+.mdc-text-field__input[data-bcup] + button {
+    left: auto !important;
+    right: 0 !important;
+    border-top-right-radius: var(--mdc-shape-small, 4px) !important;
+    border-bottom-right-radius: var(--mdc-shape-small, 4px) !important;
+}
+
+.mdc-form-field {
+    width: 100%;
+}
+
+.buttons {
+    text-align: center;
+}
+.mdc-checkbox--touch {
+    margin-left: -11px;
+}

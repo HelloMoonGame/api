@@ -17,7 +17,7 @@ namespace Authentication.Api.Infrastructure
                 context.HttpContext.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
                 
                 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-                var csp = "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self'; upgrade-insecure-requests;";
+                var csp = "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self'; upgrade-insecure-requests; style-src 'self' https://fonts.googleapis.com/ https://unpkg.com/material-components-web@latest/; font-src https://fonts.gstatic.com; script-src 'self' https://unpkg.com/material-components-web@latest/";
                 context.HttpContext.Response.Headers["Content-Security-Policy"] = csp;
                 context.HttpContext.Response.Headers["X-Content-Security-Policy"] = csp;
 

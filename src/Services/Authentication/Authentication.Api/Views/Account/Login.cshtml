@@ -1,34 +1,63 @@
 @model LoginInputModel
+@{
+    Layout = "_LayoutMaterial";
+}
 
-<div class="login-page">
-    <div class="lead">
-        <h1>Sign up or Sign in</h1>
-        <p>Please fill in your mail address to start or continue playing Hello Moon!</p>
-    </div>
-
-    <partial name="_ValidationSummary" />
-
-    <div class="row">
-        <div class="col-sm-6">
-            <form asp-route="Login" id="login">
-                <input type="hidden" asp-for="ReturnUrl" />
-
-                <div class="form-group">
-                    <label asp-for="Email"></label>
-                    <input class="form-control" placeholder="Email address" asp-for="Email" type="email" autofocus>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="RememberLogin">
-                        <label class="form-check-label" asp-for="RememberLogin">
-                            Remember My Login
-                        </label>
+<main class="mdc-layout-grid login-page">
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-3-tablet mdc-layout-grid__cell--span-7-desktop login-image"></div>
+        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-5-tablet mdc-layout-grid__cell--span-5-desktop mdc-elevation--z6">
+            <div class="login-paper">
+                <h1 class="mdc-typography--headline5">Sign up or Sign in</h1>
+                <form asp-route="Login" id="login" novalidate>
+                    <label class="mdc-text-field mdc-text-field--outlined">
+                        <span class="mdc-notched-outline">
+                            <span class="mdc-notched-outline__leading"></span>
+                            <span class="mdc-notched-outline__notch">
+                                <span class="mdc-floating-label" id="email">Email</span>
+                            </span>
+                            <span class="mdc-notched-outline__trailing"></span>
+                        </span>
+                        <input type="email" class="mdc-text-field__input" aria-labelledby="email" asp-for="Email" autofocus required>
+                    </label>
+                    <div class="mdc-form-field">
+                        <div class="mdc-touch-target-wrapper">
+                            <div class="mdc-checkbox mdc-checkbox--touch">
+                                <input type="checkbox"
+                                       class="mdc-checkbox__native-control"
+                                       asp-for="RememberLogin" />
+                                <div class="mdc-checkbox__background">
+                                    <svg class="mdc-checkbox__checkmark"
+                                         viewBox="0 0 24 24">
+                                        <path class="mdc-checkbox__checkmark-path"
+                                              fill="none"
+                                              d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+                                    </svg>
+                                    <div class="mdc-checkbox__mixedmark"></div>
+                                </div>
+                                <div class="mdc-checkbox__ripple"></div>
+                            </div>
+                        </div>
+                        <label asp-for="RememberLogin">Remember Me</label>
                     </div>
-                </div>
-
-                <button class="btn btn-primary" name="button" value="login">Play!</button>
-                <button class="btn btn-secondary" name="button" value="cancel">Cancel</button>
-            </form>
+                    <div class="buttons">
+                        <div class="mdc-touch-target-wrapper">
+                            <button name="button" value="login" class="mdc-button mdc-button--raised mdc-button--touch">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Play!</span>
+                                <span class="mdc-button__touch"></span>
+                            </button>
+                        </div>
+                        <div class="mdc-touch-target-wrapper">
+                            <button name="button" value="cancel" class="mdc-button mdc-button--touch">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Cancel</span>
+                                <span class="mdc-button__touch"></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
