@@ -59,7 +59,15 @@ namespace Authentication.Api.Controllers
         {
             // the user clicked the "cancel" button
             if (button != "login")
-                return await CancelLogin(model.ReturnUrl); 
+                return await CancelLogin(model.ReturnUrl);
+
+            if (!ModelState.IsValid)
+            {
+                var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
+                vm.Email = model.Email;
+                vm.RememberLogin = model.RememberLogin;
+                return View(vm);
+            }
 
             var user = await _mediator.Send(new GetOrCreateUserCommand(model.Email), cancellationToken);
 

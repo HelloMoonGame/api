@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
 
 namespace Authentication.Api.Application.Users.GetOrCreateUser
 {
@@ -8,6 +9,8 @@ namespace Authentication.Api.Application.Users.GetOrCreateUser
 
         public GetOrCreateUserCommand(string email)
         {
+            if (string.IsNullOrEmpty(email))
+                throw new ArgumentNullException(nameof(email));
             Email = email;
         }
     }
