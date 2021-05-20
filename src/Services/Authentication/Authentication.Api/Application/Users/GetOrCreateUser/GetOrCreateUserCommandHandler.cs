@@ -20,9 +20,6 @@ namespace Authentication.Api.Application.Users.GetOrCreateUser
 
         public async Task<UserDto> Handle(GetOrCreateUserCommand request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(request.Email))
-                return null;
-                
             var user = await _userManager.FindByEmailAsync(request.Email) ?? await CreateUser(request.Email);
             return UserDto.FromApplicationUser(user);
         }
