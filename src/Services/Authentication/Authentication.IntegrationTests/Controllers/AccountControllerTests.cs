@@ -1,5 +1,7 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using Authentication.Api.Models.Email;
 using Authentication.IntegrationTests.Helpers;
@@ -12,6 +14,50 @@ namespace Authentication.IntegrationTests.Controllers
     [TestClass]
     public class AccountControllerTests : WebHostTestBase
     {
+        [TestMethod]
+        public async Task Error_is_shown_if_user_does_not_fill_in_mail_address_at_login()
+        {
+            // Act
+            var document = await Client.StartLoginAttemptToGame(null);
+
+            // Assert
+            Assert.IsNotNull(document.Forms["login"]);
+            Assert.IsNotNull(document.GetElementById("Email"));
+            CollectionAssert.Contains(document.GetElementById("Email").ClassList.ToList(), "input-validation-error");
+        }
+        
+        [TestMethod]
+        public async Task Error_is_shown_if_user_fills_in_invalid_mail_address_at_login()
+        {
+            // Act
+            var document = await Client.StartLoginAttemptToGame("test");
+
+            // Assert
+            Assert.IsNotNull(document.Forms["login"]);
+            Assert.IsNotNull(document.GetElementById("Email"));
+            CollectionAssert.Contains(document.GetElementById("Email").ClassList.ToList(), "input-validation-error");
+        }
+
+        [TestMethod]
+        public async Task No_mail_is_send_if_user_fills_in_no_mail_address()
+        {
+            // Act
+            await Client.StartLoginAttemptToGame(null);
+
+            // Assert
+            Assert.AreEqual(0, MailServiceMock.MailsSent.Count);
+        }
+
+        [TestMethod]
+        public async Task No_mail_is_send_if_user_fills_in_invalid_mail_address()
+        {
+            // Act
+            await Client.StartLoginAttemptToGame("test");
+
+            // Assert
+            Assert.AreEqual(0, MailServiceMock.MailsSent.Count);
+        }
+
         [TestMethod]
         public async Task Welcome_mail_is_sent_if_new_user_tries_to_login()
         {
