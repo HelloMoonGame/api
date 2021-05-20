@@ -1,5 +1,7 @@
 :root {
-    --mdc-theme-primary: #212529;
+    --mdc-theme-primary: #0b3663;
+    --mdc-theme-secondary: #fdd300;
+    --mdc-checkbox-checked-color: var(--mdc-theme-primary);
 }
 
 input:-webkit-autofill,
