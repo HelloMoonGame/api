@@ -1,5 +1,5 @@
 :root {
-    --mdc-theme-primary: #000;
+    --mdc-theme-primary: #212529;
 }
 
 input:-webkit-autofill,
@@ -86,7 +86,7 @@ body.material {
 }
 
 .mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid) .mdc-floating-label {
-     color: #000;
+     color: var(--mdc-theme-primary);
  }
 
 .mdc-text-field__input[data-bcup] + button {
@@ -105,4 +105,18 @@ body.material {
 }
 .mdc-checkbox--touch {
     margin-left: -11px;
+}
+
+.mdc-circular-progress {
+    width: 256px;
+    height: 256px;
+}
+
+.mdc-circular-progress .text {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
 }
