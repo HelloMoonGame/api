@@ -11,6 +11,10 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px #fff inset !important;
 }
 
+html {
+    height: 100%;
+}
+
 .body-container {
   margin-top: 60px;
   padding-bottom: 40px;
@@ -45,15 +49,17 @@ body.material {
   padding: 0;
   margin: 0;
   min-width: 320px;
+  height: 100%;
 }
 
 .login-page {
   padding: 0;
+  height: 100%;
 }
 
 .login-page .mdc-layout-grid__inner {
   grid-gap: 0;
-  height: 100vh;
+  height: 100%;
 }
 
 .login-page .logo {
@@ -140,7 +146,11 @@ body.material {
   width: 200px;
 }
 
-.site-header + .mdc-card {
+.page-content {
+  padding-bottom: 30px;
+}
+
+.page-content > .mdc-card {
   margin: -30px 10% 0 10%;
 }
 
