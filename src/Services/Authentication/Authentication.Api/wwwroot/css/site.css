@@ -128,3 +128,24 @@ body.material {
     display: flex;
     flex-direction: column;
 }
+
+.site-header {
+    text-align: center;
+    padding: 50px 0;
+}
+
+.site-header img {
+    width: 200px;
+}
+
+.site-header + .mdc-card {
+    margin: -30px 10% 0 10%;
+}
+
+.mdc-card-wrapper__text-section {
+    padding: 16px;
+}
+
+.confirm-login-page p {
+    text-align: center;
+}

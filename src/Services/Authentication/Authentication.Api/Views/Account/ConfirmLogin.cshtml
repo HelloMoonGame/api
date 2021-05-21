@@ -1,25 +1,40 @@
 ﻿@model LoginAttemptConfirmViewModel
+@{
+    Layout = "_LayoutMaterialPage";
+}
 
-<div class="logout-page">
-    <div class="lead">
-        <h1>Login</h1>
-        @if (Model.ExpiredOrNonExisting)
-        {
-            <p>This confirmation URL is not valid (anymore). Please close this window and start the authentication process again.</p>
-        }
-        else if (Model.WasAlreadyConfirmed)
-        {
-            <p>This login attempt was already confirmed. Please close this window and return to the original browser tab.</p>
-        }
-        else
-        {
-            <form asp-action="ConfirmLoginFinish" id="confirmLogin">
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="Secret" />
-                <p>Do you want to accept the login attempt and give access to your account?</p>
-                <button class="btn btn-primary" name="button" value="yes">Yes</button>
-                <button class="btn btn-secondary" name="button" value="no">No</button>
-            </form>
-        }
-    </div>
+<div class="confirm-login-page">
+    @if (Model.ExpiredOrNonExisting)
+    {
+        <p>This confirmation URL is not valid (anymore). Please close this window and start the authentication process again.</p>
+    }
+    else if (Model.WasAlreadyConfirmed)
+    {
+        <p>This login attempt was already confirmed. Please close this window and return to the original browser tab.</p>
+    }
+    else
+    {
+        <form asp-action="ConfirmLoginFinish" id="confirmLogin">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Secret" />
+            <p>Do you want to accept the login attempt and give access to your account?</p>
+            
+            <div class="buttons">
+                <div class="mdc-touch-target-wrapper">
+                    <button name="button" value="yes" class="mdc-button mdc-button--raised mdc-button--touch">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">Yes</span>
+                        <span class="mdc-button__touch"></span>
+                    </button>
+                </div>
+                <div class="mdc-touch-target-wrapper">
+                    <button name="button" value="no" class="mdc-button mdc-button--touch">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">No</span>
+                        <span class="mdc-button__touch"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
 </div>

@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "_LayoutMaterial";
+}
+
+<header class="site-header mdc-theme--primary-bg">
+    <img src="~/img/logo_dark.jpg" alt="Hello Moon" />
+</header>
+
+<main class="mdc-card">
+    <div class="mdc-card-wrapper__text-section">
+        @RenderBody()
+    </div>
+</main>
+
+@section scripts {
+    @RenderSection("scripts", false)
+}
