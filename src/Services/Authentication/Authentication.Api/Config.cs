@@ -43,6 +43,8 @@ namespace Authentication.Api
 
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
+                    
+                    PostLogoutRedirectUris = { gameUrl },
 
                     RedirectUris = { gameUrl + "/auth/signin-callback", gameUrl + "/auth/renew-callback" },
                     
