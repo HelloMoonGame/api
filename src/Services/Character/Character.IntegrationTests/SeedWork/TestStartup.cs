@@ -10,6 +10,7 @@ namespace Character.IntegrationTests.SeedWork
     {
         public TestStartup(IConfiguration configuration) : base(configuration)
         {
+            configuration["AuthenticationApiUrl"] = "https://localhost:5000";
         }
 
         protected override void AddDatabase(IServiceCollection services)

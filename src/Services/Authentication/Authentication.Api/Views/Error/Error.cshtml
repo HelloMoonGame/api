@@ -1,0 +1,30 @@
+@model ErrorViewModel
+
+@{
+    Layout = "_LayoutMaterialPage";
+    var error = Model?.Error?.Error;
+    var errorDescription = Model?.Error?.ErrorDescription;
+    var requestId = Model?.Error?.RequestId;
+}
+
+<div class="error-page">
+    <h1>Error</h1>
+
+    @if (errorDescription != null)
+    {
+        <p>@errorDescription</p>
+    }
+    else if (error != null)
+    {
+        <p>Sorry, there was an error: <strong><em>@error</em></strong></p>
+    }
+    else
+    {
+        <p>Sorry, there was an error</p>
+    }
+
+    @if (requestId != null)
+    {
+        <small>Request Id: @requestId</small>
+    }
+</div>

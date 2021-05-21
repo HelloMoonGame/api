@@ -1,6 +1,7 @@
 ﻿using Authentication.Api.Configuration;
 using Authentication.Api.Data;
 using Authentication.Api.Domain.Login;
+using Authentication.Api.Infrastructure;
 using Authentication.Api.Infrastructure.Domain.Login;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
@@ -57,6 +58,8 @@ namespace Authentication.Api
 
             var builder = services.AddIdentityServer(options =>
             {
+                options.UserInteraction.ErrorUrl = "/Error/500";
+                
                 options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
@@ -95,23 +98,7 @@ namespace Authentication.Api
 
         public void Configure(IApplicationBuilder app)
         {
-            if (Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
-            }
-            
-            SeedData.EnsureSeedData(app.ApplicationServices);
-            
-            app.UseStaticFiles();
-
-            app.UseRouting();
-            app.UseIdentityServer();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapDefaultControllerRoute();
-            });
+            app.ConfigureApp(Environment.IsDevelopment());
         }
     }
 }

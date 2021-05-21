@@ -8,15 +8,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Authentication.IntegrationTests.Controllers
 {
     [TestClass]
-    public class HomeControllerTests : WebHostTestBase
+    public class ErrorControllerTests : WebHostTestBase
     {
         [TestMethod]
-        public async Task There_is_no_homepage()
+        public async Task The_homepage_shows_a_404_page()
         {
             var result = await Client.GetAsync("/");
             Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
         }
         
+        [TestMethod]
+        public async Task The_404_page_is_styled()
+        {
+            var result = await Client.GetAsync("/");
+            var resultDocument = await result.GetDocumentAsync();
+            Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
+            Assert.AreEqual(1, resultDocument.GetElementsByClassName("error-page").Length);
+        }
+
         [TestMethod]
         public async Task Display_nice_error_on_exception()
         {
