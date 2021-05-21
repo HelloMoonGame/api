@@ -1,10 +1,14 @@
 @model RedirectViewModel
+@{
+    Layout = "_LayoutMaterialPage";
+}
 
 <div class="redirect-page" data-url="@Model.RedirectUrl">
-    <div class="lead">
-        <h1>You are now being returned to the application</h1>
-        <p>Once complete, you may close this tab.</p>
-    </div>
+    <p>You are now being returned to the application</p>
+    <p>Once complete, you may close this tab.</p>
 </div>
 
-<script src="~/js/signin-redirect.js"></script>
+@section scripts
+{
+    <script src="~/js/signin-redirect.js"></script>
+}

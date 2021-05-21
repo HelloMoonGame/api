@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using Authentication.Api;
 using Authentication.Api.Data;
+using Authentication.Api.Infrastructure;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
 using Authentication.IntegrationTests.Mocks;
@@ -42,17 +43,7 @@ namespace Authentication.IntegrationTests.SeedWork
                 })
                 .Configure(app =>
                 {
-                    SeedData.EnsureSeedData(app.ApplicationServices);
-                    
-                    app.UseStaticFiles();
-
-                    app.UseRouting();
-                    app.UseIdentityServer();
-                    app.UseAuthorization();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapDefaultControllerRoute();
-                    });
+                    app.ConfigureApp(false);
                     
                     var userManager = app.ApplicationServices.GetService<UserManager<ApplicationUser>>();
                     if (userManager == null)
