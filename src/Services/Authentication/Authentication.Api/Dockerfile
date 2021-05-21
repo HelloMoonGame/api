@@ -36,8 +36,8 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   /d:sonar.pullrequest.base="$TARGET_BRANCH" \
   /d:sonar.pullrequest.branch="$PR_BRANCH" \
   /d:sonar.pullrequest.key="$PR_ID" \
-  ; elif [ -n "$SONAR_TOKEN" ] ;\
   /d:sonar.exclusions=Common/** \
+  ; elif [ -n "$SONAR_TOKEN" ] ;\
   then \
   dotnet sonarscanner begin \
   /k:"$SONAR_PROJECT_KEY" \
