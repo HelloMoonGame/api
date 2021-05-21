@@ -15,11 +15,6 @@ html {
     height: 100%;
 }
 
-.body-container {
-    margin-top: 60px;
-    padding-bottom: 40px;
-}
-
 .logged-out-page iframe {
     display: none;
     width: 0;
@@ -45,7 +40,7 @@ html {
     font-weight: bold;
 }
 
-body.material {
+body {
     padding: 0;
     margin: 0;
     min-width: 320px;
