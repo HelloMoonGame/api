@@ -37,6 +37,7 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   /d:sonar.pullrequest.branch="$PR_BRANCH" \
   /d:sonar.pullrequest.key="$PR_ID" \
   ; elif [ -n "$SONAR_TOKEN" ] ;\
+  /d:sonar.exclusions=Common/** \
   then \
   dotnet sonarscanner begin \
   /k:"$SONAR_PROJECT_KEY" \
@@ -45,6 +46,7 @@ RUN if [ -n "$PR_ID" ] && [ -n "$SONAR_TOKEN" ] ;\
   /d:sonar.login="$SONAR_TOKEN" \
   /d:sonar.cs.opencover.reportsPaths=/coverage/coverage.opencover.xml \
   /d:sonar.branch.name="$BRANCH" \
+  /d:sonar.exclusions=Common/** \
   ; fi
 
 COPY Services/Authentication/Authentication.Api/Authentication.Api.csproj Services/Authentication/Authentication.Api/
