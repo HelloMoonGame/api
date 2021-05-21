@@ -98,28 +98,7 @@ namespace Authentication.Api
 
         public void Configure(IApplicationBuilder app)
         {
-            if (Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error/500");
-            }
-            app.UseNotFoundHandler("/Error/404");
-
-            SeedData.EnsureSeedData(app.ApplicationServices);
-            
-            app.UseStaticFiles();
-
-            app.UseRouting();
-            app.UseIdentityServer();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapDefaultControllerRoute();
-            });
+            app.ConfigureApp(Environment.IsDevelopment());
         }
     }
 }
