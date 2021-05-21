@@ -82,8 +82,11 @@ body.material {
   }
 }
 
+.login-content {
+  padding: 32px;
+}
+
 .login-paper {
-  margin: 0 32px;
   display: flex;
   align-items: center;
   flex-direction: column;
