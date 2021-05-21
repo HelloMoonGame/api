@@ -1,15 +1,21 @@
 @model LogoutInputModel
+@{
+    Layout = "_LayoutMaterialPage";
+}
 
 <div class="logout-page">
-    <div class="lead">
-        <h1>Logout</h1>
-        <p>Would you like to logout of IdentityServer?</p>
-    </div>
-
+    <p>Would you like to logout of Hello Moon?</p>
+    
     <form asp-action="Logout" id="logout">
-        <input type="hidden" name="logoutId" value="@Model.LogoutId"  />
-        <div class="form-group">
-            <button class="btn btn-primary">Yes</button>
+        <input type="hidden" name="logoutId" value="@Model.LogoutId" />
+        <div class="buttons">
+            <div class="mdc-touch-target-wrapper">
+                <button class="mdc-button mdc-button--raised mdc-button--touch">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Yes</span>
+                    <span class="mdc-button__touch"></span>
+                </button>
+            </div>
         </div>
     </form>
 </div>

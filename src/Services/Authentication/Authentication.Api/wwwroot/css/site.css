@@ -146,6 +146,6 @@ body.material {
     padding: 16px;
 }
 
-.confirm-login-page p {
+.confirm-login-page, .logout-page, .logged-out-page p {
     text-align: center;
 }
