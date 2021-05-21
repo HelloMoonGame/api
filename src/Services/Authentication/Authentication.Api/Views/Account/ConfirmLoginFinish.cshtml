@@ -1,9 +1,11 @@
 ﻿@using Authentication.Api.Application.Login
 @model LoginAttemptStatus?
+@{
+    Layout = "_LayoutMaterialPage";
+}
 
-<div class="logout-page">
-    <div class="lead">
-        <h1>Login</h1>
+
+<div class="confirm-login-page">
         @if (Model == null || Model == LoginAttemptStatus.Expired)
         {
             <p>This confirmation URL is not valid (anymore). Please close this window and start the authentication process again.</p>
@@ -16,5 +18,4 @@
         {
             <p>Login attempt was cancelled!</p>
         }
-    </div>
 </div>

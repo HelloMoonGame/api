@@ -1,0 +1,19 @@
+@{
+    Layout = "_LayoutMaterial";
+}
+
+<main class="mdc-layout-grid login-page">
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-3-tablet mdc-layout-grid__cell--span-7-desktop login-image"></div>
+        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-5-tablet mdc-layout-grid__cell--span-5-desktop mdc-elevation--z6">
+            <div class="login-paper">
+                <img src="~/img/logo-on-white.svg" alt="Hello Moon" class="logo" />
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</main>
+
+@section scripts {
+    @RenderSection("scripts", false)
+}
