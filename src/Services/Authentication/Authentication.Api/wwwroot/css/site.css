@@ -1,14 +1,14 @@
 :root {
-  --mdc-theme-primary: #0b3663;
-  --mdc-theme-secondary: #fdd300;
-  --mdc-checkbox-checked-color: var(--mdc-theme-primary);
+    --mdc-theme-primary: #0b3663;
+    --mdc-theme-secondary: #fdd300;
+    --mdc-checkbox-checked-color: var(--mdc-theme-primary);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #fff inset !important;
+    -webkit-box-shadow: 0 0 0 30px #fff inset !important;
 }
 
 html {
@@ -16,151 +16,152 @@ html {
 }
 
 .body-container {
-  margin-top: 60px;
-  padding-bottom: 40px;
+    margin-top: 60px;
+    padding-bottom: 40px;
 }
 
 .logged-out-page iframe {
-  display: none;
-  width: 0;
-  height: 0;
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 .grants-page .card {
-  margin-top: 20px;
-  border-bottom: 1px solid lightgray;
+    margin-top: 20px;
+    border-bottom: 1px solid lightgray;
 }
 
 .grants-page .card .card-title {
-  font-size: 120%;
-  font-weight: bold;
+    font-size: 120%;
+    font-weight: bold;
 }
 
 .grants-page .card .card-title img {
-  width: 100px;
-  height: 100px;
+    width: 100px;
+    height: 100px;
 }
 
 .grants-page .card label {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 body.material {
-  padding: 0;
-  margin: 0;
-  min-width: 320px;
-  height: 100%;
+    padding: 0;
+    margin: 0;
+    min-width: 320px;
+    height: 100%;
 }
 
 .login-page {
-  padding: 0;
-  height: 100%;
+    padding: 0;
+    height: 100%;
 }
 
 .login-page .mdc-layout-grid__inner {
-  grid-gap: 0;
-  height: 100%;
+    grid-gap: 0;
+    height: 100%;
 }
 
 .login-page .logo {
-  width: 200px;
-  max-width: 80%;
-  margin-bottom: 40px;
+    width: 200px;
+    max-width: 80%;
+    margin-bottom: 40px;
 }
 
 .login-image {
-  background-size: cover;
-  background-color: #fafafa;
-  background-image: url(/img/background.jpg);
-  background-repeat: no-repeat;
-  background-position: center;
+    background-size: cover;
+    background-color: #fafafa;
+    background-image: url(/img/background.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 @media (max-width: 599px) {
-  .login-image {
-    display: none;
-  }
+    .login-image {
+        display: none;
+    }
 }
 
 .login-content {
-  padding: 32px;
+    padding: 32px;
 }
 
 .login-paper {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 .login-paper form {
-  width: 100%;
-  margin-top: 8px;
+    width: 100%;
+    margin-top: 8px;
 }
 
 .login-paper form .mdc-text-field {
-  width: 100%;
+    width: 100%;
 }
 
 .mdc-text-field--focused:not(.mdc-text-field--disabled):not(.mdc-text-field--invalid)
-  .mdc-floating-label {
-  color: var(--mdc-theme-primary);
+.mdc-floating-label {
+    color: var(--mdc-theme-primary);
 }
 
 .mdc-text-field__input[data-bcup] + button {
-  left: auto !important;
-  right: 0 !important;
-  border-top-right-radius: var(--mdc-shape-small, 4px) !important;
-  border-bottom-right-radius: var(--mdc-shape-small, 4px) !important;
+    left: auto !important;
+    right: 0 !important;
+    border-top-right-radius: var(--mdc-shape-small, 4px) !important;
+    border-bottom-right-radius: var(--mdc-shape-small, 4px) !important;
 }
 
 .mdc-form-field {
-  width: 100%;
+    width: 100%;
 }
 
 .buttons {
-  text-align: center;
+    text-align: center;
 }
+
 .mdc-checkbox--touch {
-  margin-left: -11px;
+    margin-left: -11px;
 }
 
 .mdc-circular-progress {
-  width: 200px;
-  height: 200px;
+    width: 200px;
+    height: 200px;
 }
 
 .mdc-circular-progress .text {
-  text-align: center;
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
 }
 
 .site-header {
-  text-align: center;
-  padding: 50px 0;
+    text-align: center;
+    padding: 50px 0;
 }
 
 .site-header img {
-  width: 200px;
+    width: 200px;
 }
 
 .page-content {
-  padding-bottom: 30px;
+    padding-bottom: 30px;
 }
 
 .page-content > .mdc-card {
-  margin: -30px 10% 0 10%;
+    margin: -30px 10% 0 10%;
 }
 
 .mdc-card-wrapper__text-section {
-  padding: 16px;
+    padding: 16px;
 }
 
-.confirm-login-page p {
-  text-align: center;
+.confirm-login-page, .logout-page, .logged-out-page, .error-page {
+    text-align: center;
 }

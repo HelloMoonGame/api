@@ -57,6 +57,8 @@ namespace Authentication.Api
 
             var builder = services.AddIdentityServer(options =>
             {
+                options.UserInteraction.ErrorUrl = "/Error/500";
+                
                 options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
@@ -100,7 +102,20 @@ namespace Authentication.Api
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
             }
-            
+            else
+            {
+                app.UseExceptionHandler("/Error/500");
+            }
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Response.StatusCode == 404)
+                {
+                    context.Request.Path = "/Error/404";
+                    await next();
+                }
+            });
+
             SeedData.EnsureSeedData(app.ApplicationServices);
             
             app.UseStaticFiles();
