@@ -1,6 +1,7 @@
 ﻿using Authentication.Api.Configuration;
 using Authentication.Api.Data;
 using Authentication.Api.Domain.Login;
+using Authentication.Api.Infrastructure;
 using Authentication.Api.Infrastructure.Domain.Login;
 using Authentication.Api.Models;
 using Authentication.Api.Services;
@@ -106,15 +107,7 @@ namespace Authentication.Api
             {
                 app.UseExceptionHandler("/Error/500");
             }
-            app.Use(async (context, next) =>
-            {
-                await next();
-                if (context.Response.StatusCode == 404)
-                {
-                    context.Request.Path = "/Error/404";
-                    await next();
-                }
-            });
+            app.UseNotFoundHandler("/Error/404");
 
             SeedData.EnsureSeedData(app.ApplicationServices);
             

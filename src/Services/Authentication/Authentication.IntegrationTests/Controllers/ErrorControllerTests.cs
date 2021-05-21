@@ -23,7 +23,7 @@ namespace Authentication.IntegrationTests.Controllers
             var result = await Client.GetAsync("/");
             var resultDocument = await result.GetDocumentAsync();
             Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
-            Assert.IsNotNull(resultDocument.GetElementsByClassName("error-page"));
+            Assert.AreEqual(1, resultDocument.GetElementsByClassName("error-page").Length);
         }
 
         [TestMethod]
