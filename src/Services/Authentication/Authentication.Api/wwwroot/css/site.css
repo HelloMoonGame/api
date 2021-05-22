@@ -147,6 +147,7 @@ body {
 
 .page-content {
     padding-bottom: 30px;
+    text-align: center;
 }
 
 .page-content > .mdc-card {
@@ -155,8 +156,4 @@ body {
 
 .mdc-card-wrapper__text-section {
     padding: 16px;
-}
-
-.confirm-login-page, .logout-page, .logged-out-page, .error-page {
-    text-align: center;
 }
