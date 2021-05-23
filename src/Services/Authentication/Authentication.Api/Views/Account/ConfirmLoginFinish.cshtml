@@ -1,9 +1,5 @@
 ﻿@using Authentication.Api.Application.Login
 @model LoginAttemptStatus?
-@{
-    Layout = "_LayoutMaterialPage";
-}
-
 
 <div class="confirm-login-page">
         @if (Model == null || Model == LoginAttemptStatus.Expired)

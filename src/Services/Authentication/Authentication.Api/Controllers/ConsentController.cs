@@ -46,12 +46,10 @@ namespace Authentication.Api.Controllers
         public async Task<IActionResult> Index(string returnUrl)
         {
             var vm = await BuildViewModelAsync(returnUrl);
-            if (vm != null)
-            {
-                return View("Index", vm);
-            }
+            if (vm == null)
+                throw new KeyNotFoundException("App not found!");
 
-            return View("Error");
+            return View("Index", vm);
         }
 
         /// <summary>
@@ -85,7 +83,7 @@ namespace Authentication.Api.Controllers
                 return View("Index", result.ViewModel);
             }
 
-            return View("Error");
+            throw new KeyNotFoundException("App not found!");
         }
 
         /*****************************************/
