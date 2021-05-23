@@ -147,11 +147,13 @@ body {
 
 .page-content {
     padding-bottom: 30px;
-    text-align: center;
 }
 
 .page-content > .mdc-card {
-    margin: -30px 10% 0 10%;
+    margin: -30px auto 0;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
 }
 
 .mdc-card-wrapper__text-section {
