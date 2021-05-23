@@ -1,0 +1,39 @@
+@model ScopeViewModel
+
+<li class="mdc-list-item @(Model.Required ? "mdc-list-item--disabled" : "")" role="checkbox" aria-checked="@Model.Checked.ToString().ToLowerInvariant()">
+    <span class="mdc-list-item__ripple"></span>
+    <span class="mdc-list-item__graphic">
+        <div class="mdc-checkbox">
+            <input class="mdc-checkbox__native-control"
+                   type="checkbox"
+                   name="ScopesConsented"
+                   id="scopes_@Model.Value"
+                   value="@Model.Value"
+                   checked="@Model.Checked"
+                   disabled="@Model.Required" />
+            @if (Model.Required)
+            {
+                <input type="hidden"
+                       name="ScopesConsented"
+                       value="@Model.Value" />
+            }
+            <div class="mdc-checkbox__background">
+                <svg class="mdc-checkbox__checkmark"
+                     viewBox="0 0 24 24">
+                    <path class="mdc-checkbox__checkmark-path"
+                          fill="none"
+                          d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+                </svg>
+                <div class="mdc-checkbox__mixedmark"></div>
+            </div>
+        </div>
+    </span>
+    <label class="mdc-list-item__text" for="scopes_@Model.Value">
+        <span class="mdc-list-item__primary-text">@Model.DisplayName</span>
+        <span class="mdc-list-item__secondary-text">@Model.Description</span>
+    </label>
+    @if (Model.Required)
+    {
+        <span aria-hidden="true" class="mdc-list-item__meta">Required</span>
+    }
+</li>

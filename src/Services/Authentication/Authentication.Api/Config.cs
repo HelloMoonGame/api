@@ -18,7 +18,7 @@ namespace Authentication.Api
             {
                 new("characterapi")
                 {
-                    DisplayName = "Characters", Required = true, Description = "Gives access to control your character and view others."
+                    DisplayName = "Characters", Required = true, Description = "Create, view and move characters"
                 },
             };
 
