@@ -97,6 +97,7 @@ body {
 
 .buttons {
     text-align: center;
+    padding-top: 16px;
 }
 
 .mdc-checkbox--touch {
