@@ -2,7 +2,6 @@ using System;
 using Character.Api.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Character.Api
@@ -17,9 +16,8 @@ namespace Character.Api
 
             try
             {
-                var host = CreateHostBuilder(args).Build();
                 Log.Information("Starting web host");
-                host.Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
