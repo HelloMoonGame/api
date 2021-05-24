@@ -37,12 +37,26 @@ namespace Character.IntegrationTests.SeedWork
                 .Configure(async app =>
                 {
                     app.ConfigureApp(false);
+
+                    var db = app.ApplicationServices.GetService<CharactersContext>();
+                    if (db == null)
+                        throw new Exception("CharactersContext not found!");
+                    
+                    await db.Characters.AddAsync(Api.Domain.Characters.Character.Create(
+                        Guid.Parse(WebHostTestBase.UserIdWithCharacter),
+                        "Hello",
+                        "Moon",
+                        SexType.Male,
+                        app.ApplicationServices.GetService<ISingleCharacterPerUserChecker>()
+                    ));
+                    await db.SaveChangesAsync();
                 });
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
             ReplaceDbContext(services);
+            ReplaceAuthentication(services);
         }
 
         private static void ReplaceDbContext(IServiceCollection services)
@@ -65,6 +79,20 @@ namespace Character.IntegrationTests.SeedWork
             connection.Open();
 
             return connection;
+        }
+
+        private static void ReplaceAuthentication(IServiceCollection services)
+        {
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                var config = new OpenIdConnectConfiguration()
+                {
+                    Issuer = MockJwtTokens.Issuer
+                };
+
+                config.SigningKeys.Add(MockJwtTokens.SecurityKey);
+                options.Configuration = config;
+            });
         }
     }
 }
