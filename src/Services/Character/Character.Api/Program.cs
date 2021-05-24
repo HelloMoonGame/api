@@ -10,9 +10,12 @@ namespace Character.Api
 {
     public static class Program
     {
-        private static CancellationTokenSource _cancellationToken;
-        
         public static async Task Main(string[] args)
+        {
+            await RunWithLogging(() => CreateHostBuilder(args).Build().RunAsync());
+        }
+
+        public static async Task RunWithLogging(Func<Task> action)
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
@@ -21,8 +24,7 @@ namespace Character.Api
             try
             {
                 Log.Information("Starting web host");
-                _cancellationToken = new CancellationTokenSource();
-                await CreateHostBuilder(args).Build().RunAsync(_cancellationToken.Token);
+                await action();
             }
             catch (Exception ex)
             {
@@ -33,11 +35,6 @@ namespace Character.Api
                 Log.Information("Host terminated");
                 Log.CloseAndFlush();
             }
-        }
-        
-        public static void Stop()
-        {
-            _cancellationToken.Cancel();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
