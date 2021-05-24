@@ -6,7 +6,6 @@ using Character.Api.Application.Characters.DomainServices;
 using Character.Api.Configuration;
 using Character.Api.Domain.CharacterLocations;
 using Character.Api.Domain.Characters;
-using Character.Api.GrpcServices;
 using Character.Api.Infrastructure.Database;
 using Character.Api.Infrastructure.Domain;
 using Character.Api.Infrastructure.Domain.CharacterLocations;
@@ -14,7 +13,6 @@ using Character.Api.Infrastructure.Domain.Characters;
 using Common.Domain.SeedWork;
 using Common.Infrastructure.Processing;
 using MediatR;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -116,31 +114,7 @@ namespace Character.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            
-            SeedData.EnsureSeedData(app.ApplicationServices);
-
-            app.UseRouting();
-
-            app.UseGrpcWeb();
-            app.UseCors("AllowAll");
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGrpcService<LocationService>().EnableGrpcWeb().RequireCors("AllowAllGrpc");
-
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-            
-            app.UseSwaggerDocumentation();
+            app.ConfigureApp(env.IsDevelopment());
         }
     }
 }
