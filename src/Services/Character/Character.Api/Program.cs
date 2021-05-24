@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Character.Api.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +10,9 @@ namespace Character.Api
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        private static CancellationTokenSource _cancellationToken;
+        
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
@@ -17,7 +21,8 @@ namespace Character.Api
             try
             {
                 Log.Information("Starting web host");
-                CreateHostBuilder(args).Build().Run();
+                _cancellationToken = new CancellationTokenSource();
+                await CreateHostBuilder(args).Build().RunAsync(_cancellationToken.Token);
             }
             catch (Exception ex)
             {
@@ -28,6 +33,11 @@ namespace Character.Api
                 Log.Information("Host terminated");
                 Log.CloseAndFlush();
             }
+        }
+        
+        public static void Stop()
+        {
+            _cancellationToken.Cancel();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
