@@ -9,7 +9,7 @@ namespace Character.IntegrationTests.Helpers
 {
     public static class HttpContentExtensions
     {
-        public static Task<T?> ReadObjectFromJsonAsync<T>(this HttpContent content,
+        public static Task<T> ReadObjectFromJsonAsync<T>(this HttpContent content,
             CancellationToken cancellationToken = default)
         {
             return content.ReadFromJsonAsync<T>(new JsonSerializerOptions
