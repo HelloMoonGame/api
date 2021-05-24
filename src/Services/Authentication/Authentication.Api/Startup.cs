@@ -85,8 +85,8 @@ namespace Authentication.Api
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
-            services.AddSingleton(_ => new DomainNotificationFactory(typeof(Startup)));
-            
+            services.AddSingleton(s => new DomainNotificationFactory(s.GetService<ILogger<DomainNotificationFactory>>(), typeof(Startup)));
+
             services.AddDatabaseDeveloperPageExceptionFilter();
         }
 

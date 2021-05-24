@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Character.Api
 {
@@ -110,7 +111,7 @@ namespace Character.Api
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
             
-            services.AddSingleton(_ => new DomainNotificationFactory(typeof(Startup)));
+            services.AddSingleton(s => new DomainNotificationFactory(s.GetService<ILogger<DomainNotificationFactory>>(), typeof(Startup)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
