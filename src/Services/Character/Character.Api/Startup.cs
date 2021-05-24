@@ -91,7 +91,6 @@ namespace Character.Api
             services.AddApplicationInsightsKubernetesEnricher();
             services.AddApplicationInsightsTelemetry(opt =>
             {
-                opt.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
                 opt.EnableActiveTelemetryConfigurationSetup = true;
             });
         }
