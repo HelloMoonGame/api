@@ -2,6 +2,7 @@ using System;
 using Character.Api.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Character.Api
@@ -10,12 +11,15 @@ namespace Character.Api
     {
         public static void Main(string[] args)
         {
-            LoggingExtensions.SetupLoggerConfiguration(AppName, AppVersion);
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
 
             try
             {
-                Log.Information("Starting web host for {0}", AppName);
-                CreateHostBuilder(args).Build().Run();
+                var host = CreateHostBuilder(args).Build();
+                Log.Information("Starting web host");
+                host.Run();
             }
             catch (Exception ex)
             {
@@ -23,6 +27,7 @@ namespace Character.Api
             }
             finally
             {
+                Log.Information("Host terminated");
                 Log.CloseAndFlush();
             }
         }

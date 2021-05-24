@@ -14,6 +14,7 @@ using Character.Api.Infrastructure.Domain.Characters;
 using Common.Domain.SeedWork;
 using Common.Infrastructure.Processing;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -85,6 +86,13 @@ namespace Character.Api
                     options.TokenValidationParameters.ValidateAudience = false;
                     options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
+            
+            services.AddApplicationInsightsKubernetesEnricher();
+            services.AddApplicationInsightsTelemetry(opt =>
+            {
+                opt.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                opt.EnableActiveTelemetryConfigurationSetup = true;
+            });
         }
 
         protected virtual void AddDatabase(IServiceCollection services)
