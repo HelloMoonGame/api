@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Character.IntegrationTests.Mocks
 {
-    public class MockJwtTokens
+    public static class MockJwtTokens
     {
         public static string Issuer { get; } = Guid.NewGuid().ToString();
         public static SecurityKey SecurityKey { get; }

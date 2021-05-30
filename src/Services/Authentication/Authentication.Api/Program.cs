@@ -1,51 +1,55 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Authentication.Api.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
 namespace Authentication.Api
 {
     public static class Program
     {
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
+        {
+            return await RunWithLogging(() => CreateHostBuilder(args).Build().RunAsync());
+        }
+        
+        public static async Task<int> RunWithLogging(Func<Task> action)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
-                .CreateLogger();
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
 
             try
             {
-                var host = CreateHostBuilder(args).Build();
-                
-                Log.Information("Starting host...");
-                host.Run();
+                Log.Information("Starting web host");
+                await action();
                 return 0;
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Host terminated unexpectedly.");
+                Log.Fatal(ex, "Host terminated unexpectedly");
                 return 1;
             }
             finally
             {
+                Log.Information("Host terminated");
                 Log.CloseAndFlush();
             }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog()
+                .UseSerilog((hostBuilderContext, loggerConfiguration) => {
+                    loggerConfiguration.ConfigureBaseLogging(
+                        hostBuilderContext.Configuration, AppName, AppVersion);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+        
+        public static string AppName => typeof(Program).Assembly.GetName().Name;
+        public static Version AppVersion => typeof(Program).Assembly.GetName().Version;
     }
 }

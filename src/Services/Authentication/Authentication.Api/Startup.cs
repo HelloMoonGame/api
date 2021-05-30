@@ -88,6 +88,15 @@ namespace Authentication.Api
             services.AddSingleton(s => new DomainNotificationFactory(s.GetService<ILogger<DomainNotificationFactory>>(), typeof(Startup)));
 
             services.AddDatabaseDeveloperPageExceptionFilter();
+
+            if (!Environment.IsDevelopment())
+            {
+                services.AddApplicationInsightsKubernetesEnricher();
+                services.AddApplicationInsightsTelemetry(opt =>
+                {
+                    opt.EnableActiveTelemetryConfigurationSetup = true;
+                });
+            }
         }
 
         protected virtual void AddDatabase(IServiceCollection services)
