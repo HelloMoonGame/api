@@ -1,4 +1,5 @@
-﻿using Character.Api.Domain.Characters;
+﻿using System.ComponentModel.DataAnnotations;
+using Character.Api.Domain.Characters;
 
 namespace Character.Api.Application.Characters.CreateCharacter
 {
@@ -7,16 +8,19 @@ namespace Character.Api.Application.Characters.CreateCharacter
         /// <summary>
         /// First Name of the new character
         /// </summary>
+        [Required]
         public string FirstName { get; set; }
 
         /// <summary>
         /// Last Name of the new character
         /// </summary>
+        [Required]
         public string LastName { get; set; }
 
         /// <summary>
         /// Sex describes the biological attributes of the new character
         /// </summary>
+        [Required]
         public SexType Sex { get; set; }
     }
 }

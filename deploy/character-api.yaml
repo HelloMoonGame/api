@@ -37,7 +37,7 @@ spec:
       port: 443
   selector:
     app: character-api
-    
+
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -76,6 +76,11 @@ spec:
                   key: password
             - name: ConnectionStrings__DefaultConnection
               value: "Host=character-db;Username=%DatabaseUsername%;Password=%DatabasePassword%;Database=characterdb"
+            - name: ApplicationInsights__InstrumentationKey
+              valueFrom:
+                secretKeyRef:
+                  name: applicationInsights-secrets
+                  key: instrumentationKey
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
 
@@ -89,16 +94,16 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`api.hellomoon.nl`) && PathPrefix(`/character`)
-    kind: Rule
-    services:
-    - name: character-api
-      port: 443
-      scheme: https
-    middlewares:
-    - name: character-api-stripprefix
-      namespace: hellomoon
-    - name: character-api-corsheader
-      namespace: hellomoon
+    - match: Host(`api.hellomoon.nl`) && PathPrefix(`/character`)
+      kind: Rule
+      services:
+        - name: character-api
+          port: 443
+          scheme: https
+      middlewares:
+        - name: character-api-stripprefix
+          namespace: hellomoon
+        - name: character-api-corsheader
+          namespace: hellomoon
   tls:
     certResolver: myresolver

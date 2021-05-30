@@ -6,6 +6,8 @@ using Authentication.Api.Application.Login.IntegrationHandlers;
 using Authentication.Api.Domain.Login;
 using Common.Domain.SeedWork;
 using Common.Infrastructure.Processing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Authentication.UnitTests.LoginAttempts
@@ -28,7 +30,9 @@ namespace Authentication.UnitTests.LoginAttempts
         [TestMethod]
         public void DomainNotificationFactory_should_find_LoginAttemptStartedNotification()
         {
-            var domainNotificationFactory = new DomainNotificationFactory(typeof(Startup));
+            var domainNotificationFactory = new DomainNotificationFactory(
+                NullLoggerFactory.Instance.CreateLogger<DomainNotificationFactory>(), 
+                typeof(Startup));
             Assert.AreEqual(typeof(LoginAttemptStartedNotification),
                 domainNotificationFactory.GetTypeByFullName(typeof(LoginAttemptStartedNotification).FullName));
         }
@@ -39,7 +43,9 @@ namespace Authentication.UnitTests.LoginAttempts
             var loginAttemptId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             var domainEvent = new LoginAttemptCreatedEvent(loginAttemptId, userId, "test");
-            var domainNotificationFactory = new DomainNotificationFactory(typeof(Startup));
+            var domainNotificationFactory = new DomainNotificationFactory(
+                NullLoggerFactory.Instance.CreateLogger<DomainNotificationFactory>(),
+                typeof(Startup));
             var notification = domainNotificationFactory.CreateNotification(domainEvent);
             
             Assert.IsNotNull(notification);
@@ -59,7 +65,9 @@ namespace Authentication.UnitTests.LoginAttempts
             var loginAttemptId = Guid.NewGuid();
             var domainEvent = new LoginAttemptCreatedEvent(loginAttemptId, userId, "test");
             var domainEvent2 = new LoginAttemptApprovedEvent(userId);
-            var domainNotificationFactory = new DomainNotificationFactory(typeof(Startup));
+            var domainNotificationFactory = new DomainNotificationFactory(
+                NullLoggerFactory.Instance.CreateLogger<DomainNotificationFactory>(),
+                typeof(Startup));
 
             var domainEvents = new List<IDomainEvent>
             {

@@ -7,7 +7,6 @@ using Character.Api.Domain.Characters.Rules;
 using Character.IntegrationTests.SeedWork;
 using Common.Domain.SeedWork;
 using MediatR;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

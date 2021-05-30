@@ -1,31 +1,22 @@
 ﻿using System.Threading.Tasks;
 using Character.IntegrationTests.SeedWork;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 
 namespace Character.IntegrationTests.Configuration
 {
     [TestClass]
-    public class SwaggerTests
+    public class SwaggerTests : WebHostTestBase
     {
         [TestMethod]
-        public async Task Swagger_configuration_is_validAsync()
+        public async Task Swagger_configuration_is_valid()
         {
-            var webHostBuilder =
-                new WebHostBuilder()
-                    .UseEnvironment("Test")
-                    .UseStartup<TestStartup>();
-
-            JObject root;
-            using (var server = new TestServer(webHostBuilder))
-            using (var client = server.CreateClient())
-            {
-                var result = await client.GetStringAsync("/swagger/v1/swagger.json");
-                root = JObject.Parse(result);
-            }
-
+            // Act
+            var response = await Client.GetAsync("/swagger/v1/swagger.json");
+            var content = await response.Content.ReadAsStringAsync();
+            var root = JObject.Parse(content);
+            
+            // Assert
             Assert.IsNotNull(root);
         }
     }

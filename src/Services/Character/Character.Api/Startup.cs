@@ -6,7 +6,6 @@ using Character.Api.Application.Characters.DomainServices;
 using Character.Api.Configuration;
 using Character.Api.Domain.CharacterLocations;
 using Character.Api.Domain.Characters;
-using Character.Api.GrpcServices;
 using Character.Api.Infrastructure.Database;
 using Character.Api.Infrastructure.Domain;
 using Character.Api.Infrastructure.Domain.CharacterLocations;
@@ -21,15 +20,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Character.Api
 {
     public class Startup
     {
+        private readonly IWebHostEnvironment _env;
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            _env = env;
             Configuration = configuration;
         }
         
@@ -85,6 +87,15 @@ namespace Character.Api
                     options.TokenValidationParameters.ValidateAudience = false;
                     options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
+
+            if (!_env.IsDevelopment())
+            {
+                services.AddApplicationInsightsKubernetesEnricher();
+                services.AddApplicationInsightsTelemetry(opt =>
+                {
+                    opt.EnableActiveTelemetryConfigurationSetup = true;
+                });
+            }
         }
 
         protected virtual void AddDatabase(IServiceCollection services)
@@ -102,37 +113,13 @@ namespace Character.Api
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
             
-            services.AddSingleton(_ => new DomainNotificationFactory(typeof(Startup)));
+            services.AddSingleton(s => new DomainNotificationFactory(s.GetService<ILogger<DomainNotificationFactory>>(), typeof(Startup)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            
-            SeedData.EnsureSeedData(app.ApplicationServices);
-
-            app.UseRouting();
-
-            app.UseGrpcWeb();
-            app.UseCors("AllowAll");
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGrpcService<LocationService>().EnableGrpcWeb().RequireCors("AllowAllGrpc");
-
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-            
-            app.UseSwaggerDocumentation();
+            app.ConfigureApp(env.IsDevelopment());
         }
     }
 }

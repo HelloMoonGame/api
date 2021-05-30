@@ -9,6 +9,7 @@ using Common.Domain.SeedWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Character.Api.Controllers
 {
@@ -23,10 +24,12 @@ namespace Character.Api.Controllers
     public class MyCharacterController : Controller
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<MyCharacterController> _logger;
 
-        public MyCharacterController(IMediator mediator)
+        public MyCharacterController(IMediator mediator, ILogger<MyCharacterController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -42,8 +45,12 @@ namespace Character.Api.Controllers
         {
             var character = await _mediator.Send(new GetUserCharacterQuery(Guid.Parse(User?.Identity?.Name ?? "")));
             if (character == null)
+            {
+                _logger.LogInformation("No character found for user '{User}'", User?.Identity?.Name);
                 return NotFound();
-            
+            }
+
+            _logger.LogInformation("Character {CharacterId} found for user '{User}'", character.Id, User?.Identity?.Name);
             return Ok(character);
         }
 
@@ -59,17 +66,25 @@ namespace Character.Api.Controllers
         public async Task<IActionResult> CreateCharacter([FromBody] CreateCharacterRequest request)
         {
             var userId = Guid.Parse(User?.Identity?.Name ?? "");
-            
+
+            _logger.LogInformation("Try to create character {firstName} {lastName} for user {User}", 
+                request.FirstName, request.LastName, userId);
             try
             {
                 var character = await _mediator.Send(new CreateCharacterCommand(userId,
                     request.FirstName, request.LastName, request.Sex));
+                _logger.LogInformation("Character {CharacterId} created", character.Id);
                 return Created(string.Empty, character);
             }
             catch(BusinessRuleValidationException e)
             {
                 if (e.BrokenRule.GetType() == typeof(UserCanOnlyHaveOneCharacter))
-                    return Conflict(await _mediator.Send(new GetUserCharacterQuery(userId)));
+                {
+                    var existingCharacter = await _mediator.Send(new GetUserCharacterQuery(userId));
+                    _logger.LogWarning("User {User} already has a character {FirstName} {LastName} ({CharacterId})",
+                        userId, existingCharacter?.FirstName, existingCharacter?.LastName, existingCharacter?.Id);
+                    return Conflict(existingCharacter);
+                }
 
                 throw;
             }
