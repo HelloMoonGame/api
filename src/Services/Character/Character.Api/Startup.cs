@@ -26,10 +26,12 @@ namespace Character.Api
 {
     public class Startup
     {
+        private readonly IWebHostEnvironment _env;
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            _env = env;
             Configuration = configuration;
         }
         
@@ -85,12 +87,15 @@ namespace Character.Api
                     options.TokenValidationParameters.ValidateAudience = false;
                     options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 });
-            
-            services.AddApplicationInsightsKubernetesEnricher();
-            services.AddApplicationInsightsTelemetry(opt =>
+
+            if (!_env.IsDevelopment())
             {
-                opt.EnableActiveTelemetryConfigurationSetup = true;
-            });
+                services.AddApplicationInsightsKubernetesEnricher();
+                services.AddApplicationInsightsTelemetry(opt =>
+                {
+                    opt.EnableActiveTelemetryConfigurationSetup = true;
+                });
+            }
         }
 
         protected virtual void AddDatabase(IServiceCollection services)

@@ -46,7 +46,9 @@ namespace Character.IntegrationTests.SeedWork
                 {
                     app.ConfigureApp(context.HostingEnvironment.IsEnvironment(Environments.Development));
 
-                    var db = app.ApplicationServices.GetService<CharactersContext>();
+                    using var scope = app.ApplicationServices.CreateScope();
+                    
+                    var db = scope.ServiceProvider.GetService<CharactersContext>();
                     if (db == null)
                         throw new Exception("CharactersContext not found!");
                     
@@ -55,7 +57,7 @@ namespace Character.IntegrationTests.SeedWork
                         "Hello",
                         "Moon",
                         SexType.Male,
-                        app.ApplicationServices.GetService<ISingleCharacterPerUserChecker>()
+                        scope.ServiceProvider.GetService<ISingleCharacterPerUserChecker>()
                     ));
                     await db.SaveChangesAsync();
                 });
