@@ -21,11 +21,16 @@ namespace Character.IntegrationTests.SeedWork
             Factory = new CustomWebApplicationFactory<Startup>();
             Client = Factory.CreateClient();
         }
-        
+
         protected void AuthenticateWith(string userId)
         {
+            AuthenticateWith(Client, userId);
+        }
+
+        public static void AuthenticateWith(HttpClient client, string userId)
+        {
             var token = CreateToken(userId);
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
         protected static string CreateToken(string userId)

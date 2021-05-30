@@ -14,17 +14,25 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Character.IntegrationTests.SeedWork
 {
     public class CustomWebApplicationFactory<TStartup>
         : WebApplicationFactory<TStartup> where TStartup : class
-    {   
+    {
+        private readonly string _environment;
+
+        public CustomWebApplicationFactory(string environment = null)
+        {
+            _environment = environment ?? Environments.Production;
+        }
+        
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
-                .UseEnvironment("test")
+                .UseEnvironment(_environment)
                 .ConfigureTestServices(ConfigureServices)
                 .ConfigureAppConfiguration(configBuilder =>
                 {
@@ -34,9 +42,9 @@ namespace Character.IntegrationTests.SeedWork
                             ["AuthenticationApiUrl"] = "https://auth"
                         });
                 })
-                .Configure(async app =>
+                .Configure(async (context, app) =>
                 {
-                    app.ConfigureApp(false);
+                    app.ConfigureApp(context.HostingEnvironment.IsEnvironment(Environments.Development));
 
                     var db = app.ApplicationServices.GetService<CharactersContext>();
                     if (db == null)
@@ -53,7 +61,7 @@ namespace Character.IntegrationTests.SeedWork
                 });
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection services)
         {
             ReplaceDbContext(services);
             ReplaceAuthentication(services);
@@ -71,8 +79,8 @@ namespace Character.IntegrationTests.SeedWork
             services.AddDbContext<CharactersContext>(options =>
                 options.UseSqlite(testDatabase));
         }
-        
-        public static DbConnection CreateInMemoryDatabase()
+
+        private static DbConnection CreateInMemoryDatabase()
         {
             var connection = new SqliteConnection("Filename=:memory:;cache=shared");
 
