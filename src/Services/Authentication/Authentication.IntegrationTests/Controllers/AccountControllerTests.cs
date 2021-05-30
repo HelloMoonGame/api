@@ -14,6 +14,24 @@ namespace Authentication.IntegrationTests.Controllers
     public class AccountControllerTests : WebHostTestBase
     {
         [TestMethod]
+        public async Task User_is_redirected_back_to_application_when_cancelling_login()
+        {
+            // Arrange
+            var loginPage = await Client.GetLoginPage("game", "http://localhost:3000/auth/signin-callback");
+            
+            // Act
+            var loginAttempt = await Client.SendAsync(
+                (IHtmlFormElement)loginPage.QuerySelector("form[id='login']"),
+                (IHtmlButtonElement)loginPage.QuerySelector("button[value='cancel']"));
+            
+            // Assert
+            var url = loginAttempt.RequestMessage?.RequestUri?.ToString();
+            var key = "error=access_denied";
+            Assert.IsNotNull(url);
+            Assert.IsTrue(url.Contains(key), "{0} should contain {1}", url, key);
+        }
+
+        [TestMethod]
         public async Task Error_is_shown_if_user_does_not_fill_in_mail_address_at_login()
         {
             // Act
