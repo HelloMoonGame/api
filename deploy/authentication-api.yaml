@@ -75,8 +75,8 @@ spec:
             - name: ApplicationInsights__InstrumentationKey
               valueFrom:
                 secretKeyRef:
-                  name: applicationInsights-secrets
-                  key: instrumentationKey
+                  name: applicationinsights-secrets
+                  key: instrumentationkey
             - name: AuthenticationApiUrl
               value: "https://auth.hellomoon.nl"
             - name: CharacterApiUrl
