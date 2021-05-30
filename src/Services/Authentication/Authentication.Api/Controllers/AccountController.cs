@@ -21,6 +21,7 @@ using IdentityServer4.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Authentication.Api.Controllers
 {
@@ -30,13 +31,16 @@ namespace Authentication.Api.Controllers
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IMediator _mediator;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
-            IMediator mediator)
+            IMediator mediator,
+            ILogger<AccountController> logger)
         {
             _interaction = interaction;
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -59,10 +63,14 @@ namespace Authentication.Api.Controllers
         {
             // the user clicked the "cancel" button
             if (button != "login")
+            {
+                _logger.LogInformation("User cancelled login attempt for {ReturnUrl}", model.ReturnUrl);
                 return await CancelLogin(model.ReturnUrl);
+            }
 
             if (!ModelState.IsValid)
             {
+                _logger.LogInformation("ModelState is invalid");
                 var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
                 vm.Email = model.Email;
                 vm.RememberLogin = model.RememberLogin;
@@ -91,14 +99,17 @@ namespace Authentication.Api.Controllers
             // request for a local page
             if (Url.IsLocalUrl(returnUrl))
             {
+                _logger.LogInformation("{ReturnUrl} is a local URL", returnUrl);
                 return returnUrl;
             }
             if (string.IsNullOrEmpty(returnUrl))
             {
+                _logger.LogInformation("ReturnUrl is null or empty, so return to homepage");
                 return "/";
             }
 
             // user might have clicked on a malicious link - should be logged
+            _logger.LogWarning("{ReturnUrl} is an invalid (maybe malicious) return URL", returnUrl);
             throw new AuthenticationException("invalid return URL");
         }
 
@@ -172,6 +183,7 @@ namespace Authentication.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ConfirmLogin(LoginAttemptConfirmInputModel model, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Show confirm page for {LoginAttemptId}", model.Id);
             var loginAttemptId = model.Id.GetValueOrDefault();
             var loginAttempt = await _mediator.Send(new GetLoginAttemptQuery(loginAttemptId), cancellationToken);
             if (loginAttempt?.Secret != model.Secret)
@@ -192,9 +204,12 @@ namespace Authentication.Api.Controllers
             var loginAttemptId = model.Id.GetValueOrDefault();
             if (button != "yes")
             {
+                _logger.LogInformation("Reject login attempt {LoginAttemptId}", loginAttemptId);
                 var loginAttempt = await _mediator.Send(new RejectLoginAttemptCommand(loginAttemptId, model.Secret), cancellationToken);
                 return View(loginAttempt != null ? LoginAttemptStatus.Deleted : null);
-            } else {
+            } else
+            {
+                _logger.LogInformation("Confirm login attempt {LoginAttemptId}", loginAttemptId);
                 var loginAttempt = await _mediator.Send(new ApproveLoginAttemptCommand(loginAttemptId, model.Secret), cancellationToken);
                 return View(loginAttempt?.Status);
             }
@@ -220,6 +235,8 @@ namespace Authentication.Api.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
+            _logger.LogInformation("Logout {User}", User?.Identity?.Name);
+
             var vm = new LogoutDto();
             var authenticated = User?.Identity?.IsAuthenticated == true;
 

@@ -45,6 +45,7 @@ namespace Authentication.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string returnUrl)
         {
+            _logger.LogInformation("Show consent page for {ReturnUrl}", returnUrl);
             var vm = await BuildViewModelAsync(returnUrl);
             if (vm == null)
                 throw new KeyNotFoundException("App not found!");
@@ -75,6 +76,7 @@ namespace Authentication.Api.Controllers
 
             if (result.HasValidationError)
             {
+                _logger.LogInformation("Validation error: {ValidationError}", result.ValidationError);
                 ModelState.AddModelError(string.Empty, result.ValidationError);
             }
 
@@ -91,6 +93,7 @@ namespace Authentication.Api.Controllers
         /*****************************************/
         private async Task<ProcessConsentResult> ProcessConsent(ConsentInputModel model)
         {
+            _logger.LogInformation("Process consent for {ReturnUrl}", model.ReturnUrl);
             var result = new ProcessConsentResult();
 
             // validate return url is still valid
@@ -102,6 +105,7 @@ namespace Authentication.Api.Controllers
             // user clicked 'no' - send back the standard 'access_denied' response
             if (model.Button == "no")
             {
+                _logger.LogInformation("Consent was denied by user");
                 grantedConsent = new ConsentResponse { Error = AuthorizationError.AccessDenied };
 
                 // emit event
@@ -110,6 +114,7 @@ namespace Authentication.Api.Controllers
             // user clicked 'yes' - validate the data
             else if (model.Button == "yes")
             {
+                _logger.LogInformation("Consent was accepted by user");
                 // if the user consented to some scope, build the response model
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
                 {
@@ -127,11 +132,13 @@ namespace Authentication.Api.Controllers
                 }
                 else
                 {
+                    _logger.LogInformation("Validation error: {ValidationError}", "You must pick at least one permission");
                     result.ValidationError = "You must pick at least one permission";
                 }
             }
             else
             {
+                _logger.LogInformation("User did not accept no deny consent");
                 result.ValidationError = "Invalid selection";
             }
 
