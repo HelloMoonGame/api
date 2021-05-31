@@ -1,3 +1,35 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  namespace: hellomoon
+  name: authentication-api-volume
+  labels:
+    type: local
+    app: authentication-api
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data/authentication-api"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: hellomoon
+  name: authentication-api-volume-claim
+  labels:
+    app: authentication-api
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -83,6 +115,13 @@ spec:
               value: "https://api.hellomoon.nl/character"
             - name: GameUrl
               value: "https://game.hellomoon.nl"
+          volumeMounts:
+            - mountPath: /app/certs
+              name: certs
+      volumes:
+        - name: certs
+          persistentVolumeClaim:
+            claimName: authentication-api-volume-claim
 
 ---
 kind: IngressRoute
