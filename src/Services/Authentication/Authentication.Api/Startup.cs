@@ -112,7 +112,7 @@ namespace Authentication.Api
             }
         }
 
-        private X509Certificate2 LoadOrCreateCertificate(string certificateFile)
+        private static X509Certificate2 LoadOrCreateCertificate(string certificateFile)
         {
             X509Certificate2 certificate;
             try
@@ -137,9 +137,9 @@ namespace Authentication.Api
             return certificate;
         }
 
-        public static X509Certificate2 GenerateSelfSignedCertificate()
+        private static X509Certificate2 GenerateSelfSignedCertificate()
         {
-            X500DistinguishedName distinguishedName = new X500DistinguishedName("CN=Authentication");
+            var distinguishedName = new X500DistinguishedName("CN=Authentication");
 
             using RSA rsa = RSA.Create(2048);
             var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
