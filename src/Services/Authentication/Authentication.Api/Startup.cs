@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Authentication.Api.Configuration;
@@ -13,7 +14,6 @@ using Common.Domain.SeedWork;
 using Common.Domain.SharedKernel;
 using Common.Infrastructure.Domain;
 using Common.Infrastructure.Processing;
-using IdentityServer4.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -43,20 +43,18 @@ namespace Authentication.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMediatR(typeof(Startup));
-            
-            services.AddSingleton<ICorsPolicyService>(container => {
-                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
-                return new DefaultCorsPolicyService(logger)
-                {
-                    AllowAll = true
-                };
-            });
 
             services.AddControllersWithViews();
 
             AddDatabase(services);
             services.AddScoped<DbContext>(provider => provider.GetService<ApplicationDbContext>());
-
+            
+            var certificateFile = Path.Combine(".", "certs", "certificate.pfx");
+            var directoryInfo = new FileInfo(certificateFile).Directory;
+            if (directoryInfo != null)
+                Directory.CreateDirectory(directoryInfo.FullName);
+            var certificate = LoadOrCreateCertificate(certificateFile);
+            
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
@@ -64,38 +62,37 @@ namespace Authentication.Api
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            var builder = services.AddIdentityServer(options =>
-            {
-                options.UserInteraction.ErrorUrl = "/Error/500";
-                
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseSuccessEvents = true;
+            services.AddIdentityServer(options =>
+                {
+                    options.UserInteraction.ErrorUrl = "/Error/500";
 
-                // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
-                options.EmitStaticAudienceClaim = true;
-            })
-                .AddInMemoryIdentityResources(Config.IdentityResources)
-                .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryClients(Config.Clients(Configuration["GameUrl"], Configuration["CharacterApiUrl"]))
-                .AddAspNetIdentity<ApplicationUser>();
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseSuccessEvents = true;
+
+                    // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
+                    options.EmitStaticAudienceClaim = true;
+                })
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = dbOptions => SetDatabaseOptions(dbOptions, Configuration);
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = dbOptions => SetDatabaseOptions(dbOptions, Configuration);
+                })
+                .AddSigningCredential(certificate)
+                .AddValidationKey(certificate);
 
             services.AddDataProtection()
                 .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(".", "certs", "sessions")));
-
-            var certificateFile = Path.Combine(".", "certs", "certificate.pfx");
-            var directoryInfo = new FileInfo(certificateFile).Directory;
-            if (directoryInfo != null)
-                Directory.CreateDirectory(directoryInfo.FullName);
-            var certificate = LoadOrCreateCertificate(certificateFile);
-            builder.AddSigningCredential(certificate)
-                .AddValidationKey(certificate);
-
+            
             services.AddAuthentication();
 
             var mailConfig = Configuration.GetSection("mail").Get<MailConfig>();
-            
+
             services.AddTransient(_ => mailConfig);
             services.AddTransient<IMailService, MailService>();
             services.AddTransient<ILoginAttemptRepository, LoginAttemptRepository>();
@@ -125,8 +122,8 @@ namespace Authentication.Api
                 if (certificate.NotBefore.ToUniversalTime() > SystemClock.Now ||
                     certificate.NotAfter.ToUniversalTime() < SystemClock.Now)
                 {
-                    Log.Logger.Warning("Certificate only valid between {ValidFrom} and {ValidTill}", 
-                        certificate.NotBefore.ToUniversalTime(), 
+                    Log.Logger.Warning("Certificate only valid between {ValidFrom} and {ValidTill}",
+                        certificate.NotBefore.ToUniversalTime(),
                         certificate.NotAfter.ToUniversalTime());
                     throw new CertificateExpiredException();
                 }
@@ -153,16 +150,31 @@ namespace Authentication.Api
 
             request.CertificateExtensions.Add(
                 new X509EnhancedKeyUsageExtension(
-                    new OidCollection { new ("1.3.6.1.5.5.7.3.2") }, false));
+                    new OidCollection { new("1.3.6.1.5.5.7.3.2") }, false));
 
             return request.CreateSelfSigned(new DateTimeOffset(DateTime.UtcNow.AddDays(-1)), new DateTimeOffset(DateTime.UtcNow.AddYears(10)));
         }
 
         protected virtual void AddDatabase(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(System.Environment.ExpandEnvironmentVariables(Configuration.GetConnectionString("DefaultConnection"))));
+            services.AddDbContext<ApplicationDbContext>(options => SetDatabaseOptions(options, Configuration));
         }
+
+        public static Action<DbContextOptionsBuilder, IConfiguration> SetDatabaseOptions { get; set; } =
+            (options, configuration) =>
+            {
+                var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+                options.UseNpgsql(
+                    System.Environment.ExpandEnvironmentVariables(
+                        configuration.GetConnectionString("DefaultConnection")),
+                    sqlOptions =>
+                    {
+                        sqlOptions.MigrationsAssembly(migrationsAssembly);
+                        sqlOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30),
+                            null);
+                    });
+            };
 
         public void Configure(IApplicationBuilder app)
         {

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
+using Authentication.Api;
 using Authentication.Api.Data;
 using Authentication.Api.Infrastructure;
 using Authentication.Api.Models;
@@ -24,13 +26,22 @@ namespace Authentication.IntegrationTests.SeedWork
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            var testDatabase = CreateInMemoryDatabase();
+            
+            Startup.SetDatabaseOptions = (options, configuration) =>
+            {
+                var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+                options.UseSqlite(testDatabase,
+                    sqlOptions =>
+                    {
+                        sqlOptions.MigrationsAssembly(migrationsAssembly);
+                    });
+            };
+            
             builder
                 .UseEnvironment("test")
-                .ConfigureServices(services =>
-                {
-                    ReplaceDbContext(services);
-                    ReplaceMailService(services);
-                })
+                .ConfigureServices(ReplaceMailService)
                 .ConfigureAppConfiguration(configBuilder =>
                 {
                     configBuilder.AddInMemoryCollection(
@@ -68,19 +79,6 @@ namespace Authentication.IntegrationTests.SeedWork
                         throw new Exception(result.Errors.First().Description);
                     }
                 });
-        }
-
-        private static void ReplaceDbContext(IServiceCollection services)
-        {
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                     typeof(DbContextOptions<ApplicationDbContext>));
-
-            services.Remove(descriptor);
-
-            var testDatabase = CreateInMemoryDatabase();
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(testDatabase));
         }
 
         private static void ReplaceMailService(IServiceCollection services)
