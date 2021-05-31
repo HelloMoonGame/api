@@ -16,6 +16,7 @@ using Common.Infrastructure.Processing;
 using IdentityServer4.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +80,9 @@ namespace Authentication.Api
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients(Configuration["GameUrl"], Configuration["CharacterApiUrl"]))
                 .AddAspNetIdentity<ApplicationUser>();
+
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(".", "certs", "sessions")));
 
             var certificateFile = Path.Combine(".", "certs", "certificate.pfx");
             var directoryInfo = new FileInfo(certificateFile).Directory;
