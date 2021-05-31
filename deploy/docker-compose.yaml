@@ -47,6 +47,8 @@ services:
       ConnectionStrings__DefaultConnection: Host=db;Username=postgres;Password=this_is_a_public_password;Database=charactersdb
       AuthenticationApiUrl: https://localhost:5000
       Logging__LogLevel__Microsoft: Debug
+    volumes:
+      - "./certs:/app/certs"
     labels:
       - traefik.enable=true
       - traefik.http.routers.character.rule=PathPrefix(`/character`)
