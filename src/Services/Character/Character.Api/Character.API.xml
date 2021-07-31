@@ -64,6 +64,21 @@
             Sex describes the biological attributes of the new character
             </summary>
         </member>
+        <member name="P:Character.Api.Application.Travel.StartTravel.StartTravelRequest.CharacterId">
+            <summary>
+            Id of the character to move
+            </summary>
+        </member>
+        <member name="P:Character.Api.Application.Travel.StartTravel.StartTravelRequest.X">
+            <summary>
+            X-position of the lot to travel to
+            </summary>
+        </member>
+        <member name="P:Character.Api.Application.Travel.StartTravel.StartTravelRequest.Y">
+            <summary>
+            Y-position of the lot to travel to
+            </summary>
+        </member>
         <member name="T:Character.Api.Controllers.MyCharacterController">
             <summary>
             Manage the character a user is playing with.
@@ -83,6 +98,18 @@
             </summary>
             <param name="request">Character details</param>
             <returns>Created character</returns>
+        </member>
+        <member name="T:Character.Api.Controllers.TravelController">
+            <summary>
+            Move a character over the map
+            </summary>
+        </member>
+        <member name="M:Character.Api.Controllers.TravelController.StartTravel(Character.Api.Application.Travel.StartTravel.StartTravelRequest)">
+            <summary>
+            Travel to a given location
+            </summary>
+            <param name="request">Character and destination</param>
+            <returns>Created travel job</returns>
         </member>
         <member name="T:Character.Api.Domain.Characters.SexType">
             <summary>
