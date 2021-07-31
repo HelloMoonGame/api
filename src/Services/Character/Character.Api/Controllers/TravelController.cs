@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Character.Api.Application.CharacterLocations;
 using Character.Api.Application.CharacterLocations.MoveCharacter;
-using Character.Api.Application.Characters;
 using Character.Api.Application.Characters.GetUserCharacter;
 using Character.Api.Application.Travel.StartTravel;
-using Character.Api.Domain.Characters.Rules;
-using Common.Domain.SeedWork;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,8 +37,8 @@ namespace Character.Api.Controllers
         /// <returns>Created travel job</returns>
         [Route("")]
         [HttpPost]
-        [ProducesResponseType((int)HttpStatusCode.Created)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(CharacterLocationDto), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> StartTravel([FromBody] StartTravelRequest request)
         {
             var userId = Guid.Parse(User?.Identity?.Name ?? "");
@@ -54,12 +50,12 @@ namespace Character.Api.Controllers
             if (request.CharacterId != character.Id)
             {
                 _logger.LogError("User {User} is playing with {CurrentCharacterId} and tried to travel with {CharacterId}", userId, character.Id, request.CharacterId);
-                return BadRequest();
+                return Unauthorized();
             }
 
-            await _mediator.Send(new MoveCharacterCommand(request.CharacterId, request.X, request.Y));
-            _logger.LogInformation("Character {CharacterId} moved to {X},{Y}", request.CharacterId, request.X, request.Y);
-            return Created(string.Empty, null);
+            var newLocation = await _mediator.Send(new MoveCharacterCommand(request.CharacterId, request.X, request.Y));
+            _logger.LogInformation("Character {CharacterId} moved to {X},{Y}", newLocation.CharacterId, newLocation.X, newLocation.Y);
+            return Created(string.Empty, newLocation);
         }
     }
 }
