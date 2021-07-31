@@ -47,9 +47,9 @@ namespace Character.Api.Controllers
                 request.CharacterId, userId, request.X, request.Y);
 
             var character = await _mediator.Send(new GetUserCharacterQuery(userId));
-            if (request.CharacterId != character.Id)
+            if (request.CharacterId != character?.Id)
             {
-                _logger.LogError("User {User} is playing with {CurrentCharacterId} and tried to travel with {CharacterId}", userId, character.Id, request.CharacterId);
+                _logger.LogError("User {User} is playing with {CurrentCharacterId} and tried to travel with {CharacterId}", userId, character?.Id, request.CharacterId);
                 return Unauthorized();
             }
 

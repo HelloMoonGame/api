@@ -18,7 +18,8 @@ namespace Character.IntegrationTests.Travel
         {
             // Arrange
             AuthenticateWith(UserIdWithCharacter);
-            var character = await Client.GetFromJsonAsync<CharacterDto>("/MyCharacter");
+            var characterResult = await Client.GetAsync("/MyCharacter");
+            var character = await characterResult.Content.ReadObjectFromJsonAsync<CharacterDto>();
 
             // Act
             var result = await Client.PostAsync("/Travel", JsonContent.Create(new StartTravelRequest
@@ -42,7 +43,8 @@ namespace Character.IntegrationTests.Travel
         {
             // Arrange
             AuthenticateWith(UserIdWithCharacter);
-            var character = await Client.GetFromJsonAsync<CharacterDto>("/MyCharacter");
+            var characterResult = await Client.GetAsync("/MyCharacter");
+            var character = await characterResult.Content.ReadObjectFromJsonAsync<CharacterDto>();
             AuthenticateWith(UserIdWithoutCharacter);
 
             // Act
