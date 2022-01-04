@@ -85,25 +85,29 @@ spec:
               value: "https://auth.hellomoon.nl"
 
 ---
-kind: IngressRoute
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
+  name: character-api
   namespace: hellomoon
-  name: character-api-ingressroutetls
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: "hellomoon-character-api-stripprefix@kubernetescrd,hellomoon-character-api-corsheader@kubernetescrd"
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`api.hellomoon.nl`) && PathPrefix(`/character`)
-      kind: Rule
-      services:
-        - name: character-api
-          port: 443
-          scheme: https
-      middlewares:
-        - name: character-api-stripprefix
-          namespace: hellomoon
-        - name: character-api-corsheader
-          namespace: hellomoon
   tls:
-    certResolver: myresolver
+  - hosts:
+    - api.hellomoon.nl
+    secretName: hellomoon-api-tls
+  rules:
+    - host: api.hellomoon.nl
+      http:
+        paths:
+          - path: /character
+            pathType: Prefix
+            backend:
+              service:
+                name: character-api
+                port:
+                  number: 443

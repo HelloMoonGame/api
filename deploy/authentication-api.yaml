@@ -124,20 +124,28 @@ spec:
             claimName: authentication-api-volume-claim
 
 ---
-kind: IngressRoute
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
+  name: authentication-api
   namespace: hellomoon
-  name: authentication-api-ingressroutetls
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`auth.hellomoon.nl`)
-      kind: Rule
-      services:
-        - name: authentication-api
-          port: 443
-          scheme: https
   tls:
-    certResolver: myresolver
+  - hosts:
+    - auth.hellomoon.nl
+    secretName: hellomoon-auth-tls
+  rules:
+    - host: auth.hellomoon.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authentication-api
+                port:
+                  number: 443
